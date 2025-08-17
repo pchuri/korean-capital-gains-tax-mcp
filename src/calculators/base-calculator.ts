@@ -12,24 +12,24 @@ import {
   TaxExemption,
   CalculationResult,
   TaxCalculationError,
-} from '../types';
+} from '../types/index.js';
 import {
   BASIC_DEDUCTION,
   ONE_HOUSE_EXEMPTION_LIMIT,
   ADJUSTMENT_TARGET_AREA,
-} from '../utils/constants';
+} from '../utils/constants.js';
 import {
   calculateHoldingPeriodYears,
   calculateResidencePeriodYears,
   isAcquiredAfter,
-} from '../utils/date-utils';
+} from '../utils/date-utils.js';
 import {
   getLongTermDeductionRate,
   getFinalTaxRate,
   calculateProgressiveTaxRate,
   calculateHighValueHouseTaxableGains,
-} from '../utils/tax-rates';
-import { validateAllInputs } from '../utils/validators';
+} from '../utils/tax-rates.js';
+import { validateAllInputs } from '../utils/validators.js';
 
 export class BaseCalculator {
   /**
@@ -108,27 +108,46 @@ export class BaseCalculator {
       description: `${transaction.transferPrice.toLocaleString()}원 - ${property.acquisitionPrice.toLocaleString()}원 - ${totalNecessaryExpenses.toLocaleString()}원`,
     });
 
-    // 3. 1세대 1주택 고가주택 과세대상 계산
+    // 3. 1세대 1주택 비과세 적용
     let taxableCapitalGains = capitalGains;
-    if (owner.householdType === '1household1house' && this.meetsOneHouseExemptionRequirements(property, owner)) {
-      taxableCapitalGains = calculateHighValueHouseTaxableGains(
-        capitalGains,
-        transaction.transferPrice,
-        ONE_HOUSE_EXEMPTION_LIMIT
-      );
-
-      if (taxableCapitalGains < capitalGains) {
+    
+    if (owner.householdType === '1household1house' && this.meetsOneHouseExemptionRequirements(property, owner, transaction.transferDate)) {
+      
+      // 양도가액이 12억원 이하인 경우 완전 비과세
+      if (transaction.transferPrice <= ONE_HOUSE_EXEMPTION_LIMIT) {
+        taxableCapitalGains = 0;
         exemptions.push({
-          type: 'partial_exemption',
-          amount: capitalGains - taxableCapitalGains,
-          reason: '1세대 1주택 12억원 이하 비과세',
+          type: 'full_exemption',
+          amount: capitalGains,
+          reason: '1세대 1주택 12억원 이하 완전 비과세',
         });
 
         steps.push({
-          stepName: '1세대 1주택 과세대상 계산',
+          stepName: '1세대 1주택 완전 비과세',
+          formula: '양도가액 ≤ 12억원',
+          amount: 0,
+          description: `양도가액 ${transaction.transferPrice.toLocaleString()}원 ≤ 12억원으로 완전 비과세`,
+        });
+      } 
+      // 양도가액이 12억원 초과인 경우 비례과세
+      else {
+        taxableCapitalGains = calculateHighValueHouseTaxableGains(
+          capitalGains,
+          transaction.transferPrice,
+          ONE_HOUSE_EXEMPTION_LIMIT
+        );
+
+        exemptions.push({
+          type: 'partial_exemption',
+          amount: capitalGains - taxableCapitalGains,
+          reason: '1세대 1주택 12억원 초과분 비례과세',
+        });
+
+        steps.push({
+          stepName: '1세대 1주택 비례과세',
           formula: '양도차익 × (양도가액 - 12억원) / 양도가액',
           amount: taxableCapitalGains,
-          description: `고가주택 과세: ${taxableCapitalGains.toLocaleString()}원`,
+          description: `고가주택 과세대상: ${taxableCapitalGains.toLocaleString()}원`,
         });
       }
     }
@@ -223,7 +242,11 @@ export class BaseCalculator {
   /**
    * 1세대 1주택 비과세 요건 충족 여부
    */
-  protected meetsOneHouseExemptionRequirements(property: PropertyInfo, owner: OwnerInfo): boolean {
+  protected meetsOneHouseExemptionRequirements(
+    property: PropertyInfo, 
+    owner: OwnerInfo, 
+    transferDate: string
+  ): boolean {
     if (owner.householdType !== '1household1house') {
       return false;
     }
@@ -231,7 +254,7 @@ export class BaseCalculator {
     // 보유기간 2년 이상
     const holdingYears = calculateHoldingPeriodYears(
       property.acquisitionDate,
-      property.acquisitionDate // 임시로 같은 날짜 사용, 실제로는 양도일 필요
+      transferDate
     );
 
     if (holdingYears < 2) {
@@ -246,7 +269,7 @@ export class BaseCalculator {
       );
 
       if (isAcquiredAfterRegulation) {
-        const residenceYears = this.calculateResidenceYears(owner, property.acquisitionDate);
+        const residenceYears = this.calculateResidenceYears(owner, transferDate);
         return residenceYears >= 2;
       }
     }

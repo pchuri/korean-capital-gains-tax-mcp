@@ -2,10 +2,10 @@
  * Tax calculation explanation tool
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo } from '../types';
-import { calculateHoldingPeriodYears, calculateResidencePeriodYears } from '../utils/date-utils';
-import { getLongTermDeductionRate, getFinalTaxRate } from '../utils/tax-rates';
-import { ONE_HOUSE_EXEMPTION_LIMIT } from '../utils/constants';
+import { PropertyInfo, TransactionInfo, OwnerInfo } from '../types/index.js';
+import { calculateHoldingPeriodYears, calculateResidencePeriodYears } from '../utils/date-utils.js';
+import { getLongTermDeductionRate, getFinalTaxRate } from '../utils/tax-rates.js';
+import { ONE_HOUSE_EXEMPTION_LIMIT } from '../utils/constants.js';
 
 export interface ExplainCalculationParams {
   /** 부동산 정보 */

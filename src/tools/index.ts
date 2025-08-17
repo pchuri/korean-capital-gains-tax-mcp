@@ -1,3 +1,3 @@
-export * from './calculate-tax';
-export * from './validate-property';
-export * from './explain-calculation';
+export * from './calculate-tax.js';
+export * from './validate-property.js';
+export * from './explain-calculation.js';

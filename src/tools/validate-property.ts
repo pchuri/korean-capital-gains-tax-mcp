@@ -2,8 +2,8 @@
  * Property validation tool
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types';
-import { validateAllInputs } from '../utils/validators';
+import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types/index.js';
+import { validateAllInputs } from '../utils/validators.js';
 
 export interface ValidatePropertyParams {
   /** 부동산 정보 */

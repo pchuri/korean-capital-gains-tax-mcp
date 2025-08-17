@@ -2,8 +2,8 @@
  * Main capital gains tax calculation tool
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types';
-import { BaseCalculator } from '../calculators/base-calculator';
+import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types/index.js';
+import { BaseCalculator } from '../calculators/base-calculator.js';
 
 export interface CalculateTaxParams {
   /** 부동산 정보 */

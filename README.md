@@ -19,41 +19,92 @@ TypeScript로 구현된 한국 부동산 양도소득세 계산을 위한 MCP �
 
 ## 🚀 빠른 시작
 
-### 설치
+### 설치 및 빌드
 
 ```bash
 git clone https://github.com/pchuri/korean-capital-gains-tax-mcp.git
 cd korean-capital-gains-tax-mcp
 npm install
-```
-
-### 빌드
-
-```bash
 npm run build
 ```
 
-### 서버 실행
+### Claude Desktop 설정
+
+**1단계**: Claude Desktop 설정 파일 편집
 
 ```bash
-npm start
+# macOS/Linux
+code ~/Library/Application\ Support/Claude/claude_desktop_config.json
+
+# Windows
+notepad %APPDATA%/Claude/claude_desktop_config.json
 ```
 
-### 개발 모드 실행
+**2단계**: 다음 설정 추가 (경로를 실제 프로젝트 위치로 수정)
+
+```json
+{
+  "mcpServers": {
+    "korean-capital-gains-tax-dev": {
+      "command": "/opt/homebrew/bin/npm",
+      "args": ["run", "dev", "--prefix", "/Users/user/dev/korean-capital-gains-tax-mcp/"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}
+```
+
+> **팁**: `which npm` 명령어로 npm 경로를 확인하고, `--prefix` 플래그로 프로젝트 디렉토리를 명시하세요.
+
+**3단계**: Claude Desktop 재시작
+
+> 📖 **자세한 설정 가이드**: [SETUP_GUIDE.md](./SETUP_GUIDE.md)를 참조하세요.
+
+### 독립 실행 (개발/테스트용)
 
 ```bash
-npm run dev
+npm start     # 프로덕션 모드
+npm run dev   # 개발 모드 (자동 재시작)
 ```
 
 ## 📖 사용법
 
+### Claude Desktop에서 사용하기
+
+설정이 완료되면 Claude Desktop에서 다음과 같이 사용할 수 있습니다:
+
+**💡 양도소득세 계산 요청:**
+```
+다음 조건으로 양도소득세를 계산해주세요:
+
+부동산: 강남구 아파트, 취득가 8억(2017.1.1), 전용면적 80㎡
+거래: 양도가 15억(2024.12.1), 중개수수료 800만원
+소유자: 1세대1주택, 7년간 거주
+```
+
+**🔍 데이터 검증 요청:**
+```
+다음 정보가 올바른지 검증해주세요:
+- 아파트 취득: 2020년 6월, 5억원
+- 양도: 2024년 1월, 7억원  
+- 다주택자
+```
+
+**📚 계산 과정 설명 요청:**
+```
+1세대1주택 양도소득세 계산 과정을 설명해주세요.
+보유 5년, 거주 3년인 경우의 세율과 공제를 알려주세요.
+```
+
 ### MCP 도구 목록
 
 1. **`calculate_capital_gains_tax`** - 양도소득세 계산
-2. **`validate_property_info`** - 입력 데이터 유효성 검사
+2. **`validate_property_info`** - 입력 데이터 유효성 검사  
 3. **`explain_calculation`** - 계산 과정 및 법령 설명
 
-### 기본 사용 예제
+### API 사용 예제 (개발자용)
 
 ```json
 {
@@ -65,7 +116,7 @@ npm run dev
       "acquisitionDate": "2017-01-01",
       "location": {
         "city": "서울특별시",
-        "district": "강남구",
+        "district": "강남구", 
         "isAdjustmentTargetArea": true
       },
       "area": {
@@ -94,10 +145,12 @@ npm run dev
 
 ## 📚 문서
 
-- [API 참조](docs/API_REFERENCE.md) - 상세한 API 문서
-- [사용 예제](docs/EXAMPLES.md) - 다양한 사용 사례
-- [양도소득세 가이드](docs/CAPITAL_GAINS_TAX_GUIDE.md) - 한국 양도소득세 법령 설명
-- [개발 가이드라인](docs/CODING_GUIDELINES.md) - 개발자를 위한 가이드라인
+- [🚀 설정 가이드](./SETUP_GUIDE.md) - Claude Desktop 설정 방법
+- [💡 사용 예시](./USAGE_EXAMPLES.md) - 실제 사용 사례와 대화 예시
+- [📖 API 참조](docs/API_REFERENCE.md) - 상세한 API 문서
+- [🏗️ 사용 예제](docs/EXAMPLES.md) - 다양한 사용 사례
+- [⚖️ 양도소득세 가이드](docs/CAPITAL_GAINS_TAX_GUIDE.md) - 한국 양도소득세 법령 설명
+- [🛠️ 개발 가이드라인](docs/CODING_GUIDELINES.md) - 개발자를 위한 가이드라인
 
 ## 🏗️ 아키텍처
 

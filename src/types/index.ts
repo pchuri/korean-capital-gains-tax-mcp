@@ -2,5 +2,5 @@
  * Type definitions index file
  */
 
-export * from './property';
-export * from './tax';
+export * from './property.js';
+export * from './tax.js';

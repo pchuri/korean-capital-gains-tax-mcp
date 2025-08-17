@@ -2,9 +2,9 @@
  * Input validation utilities
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types';
-import { ERROR_CODES } from './constants';
-import { isValidDateFormat, isDateBefore } from './date-utils';
+import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types/index.js';
+import { ERROR_CODES } from './constants.js';
+import { isValidDateFormat, isDateBefore } from './date-utils.js';
 
 export interface ValidationResult {
   isValid: boolean;

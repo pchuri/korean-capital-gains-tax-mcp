@@ -2,7 +2,7 @@
  * Korean tax law constants
  */
 
-import { TaxRateBracket, LongTermDeductionRate } from '../types';
+import { TaxRateBracket, LongTermDeductionRate } from '../types/index.js';
 
 /** 기본공제액 (원) */
 export const BASIC_DEDUCTION = 2_500_000;

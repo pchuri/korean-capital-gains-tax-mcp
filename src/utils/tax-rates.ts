@@ -2,7 +2,7 @@
  * Tax rates calculation utilities
  */
 
-import { BASIC_TAX_RATES, LONG_TERM_DEDUCTION_RATES } from './constants';
+import { BASIC_TAX_RATES, LONG_TERM_DEDUCTION_RATES } from './constants.js';
 
 /**
  * 과세표준에 따른 세율 계산 (누진세)

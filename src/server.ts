@@ -357,6 +357,9 @@ async function main(): Promise<void> {
   await server.run();
 }
 
+// Export main function for external use
+export default main;
+
 // Start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
