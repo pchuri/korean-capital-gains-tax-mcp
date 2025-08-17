@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "korean-capital-gains-tax": {
+      "command": "node",
+      "args": ["dist/server.js"],
+      "cwd": "/path/to/korean-capital-gains-tax-mcp"
+    }
+  }
+}
