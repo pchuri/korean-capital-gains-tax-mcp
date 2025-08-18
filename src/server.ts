@@ -2,7 +2,7 @@
 
 /**
  * Korean Capital Gains Tax MCP Server
- * 
+ *
  * A Model Context Protocol server for calculating Korean capital gains tax
  * on real estate transactions.
  */
@@ -25,7 +25,8 @@ import { explainCalculation } from './tools/explain-calculation.js';
 const TOOLS: Tool[] = [
   {
     name: 'calculate_capital_gains_tax',
-    description: '한국 부동산 양도소득세를 계산합니다. 부동산 정보, 거래 정보, 소유자 정보를 입력하면 상세한 세액 계산 결과를 제공합니다.',
+    description:
+      '한국 부동산 양도소득세를 계산합니다. 부동산 정보, 거래 정보, 소유자 정보를 입력하면 상세한 세액 계산 결과를 제공합니다.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -36,7 +37,8 @@ const TOOLS: Tool[] = [
             type: {
               type: 'string',
               enum: ['apartment', 'house', 'land', 'commercial'],
-              description: '부동산 유형 (apartment: 아파트, house: 주택, land: 토지, commercial: 상업용)',
+              description:
+                '부동산 유형 (apartment: 아파트, house: 주택, land: 토지, commercial: 상업용)',
             },
             acquisitionPrice: {
               type: 'number',
@@ -83,7 +85,13 @@ const TOOLS: Tool[] = [
               required: ['totalArea', 'exclusiveArea'],
             },
           },
-          required: ['type', 'acquisitionPrice', 'acquisitionDate', 'location', 'area'],
+          required: [
+            'type',
+            'acquisitionPrice',
+            'acquisitionDate',
+            'location',
+            'area',
+          ],
         },
         transaction: {
           type: 'object',
@@ -140,7 +148,8 @@ const TOOLS: Tool[] = [
             householdType: {
               type: 'string',
               enum: ['1household1house', 'multiple', 'temporary2house'],
-              description: '세대 구성 유형 (1household1house: 1세대1주택, multiple: 다주택, temporary2house: 일시적2주택)',
+              description:
+                '세대 구성 유형 (1household1house: 1세대1주택, multiple: 다주택, temporary2house: 일시적2주택)',
             },
             residencePeriod: {
               type: 'object',
@@ -196,25 +205,30 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'validate_property_info',
-    description: '입력된 부동산 정보의 유효성을 검증합니다. 필수 필드 누락, 잘못된 형식, 논리적 오류 등을 확인합니다.',
+    description:
+      '입력된 부동산 정보의 유효성을 검증합니다. 필수 필드 누락, 잘못된 형식, 논리적 오류 등을 확인합니다.',
     inputSchema: {
       type: 'object',
       properties: {
         property: {
           type: 'object',
-          description: '검증할 부동산 정보 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '검증할 부동산 정보 (calculate_capital_gains_tax와 동일한 스키마)',
         },
         transaction: {
           type: 'object',
-          description: '검증할 거래 정보 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '검증할 거래 정보 (calculate_capital_gains_tax와 동일한 스키마)',
         },
         owner: {
           type: 'object',
-          description: '검증할 소유자 정보 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '검증할 소유자 정보 (calculate_capital_gains_tax와 동일한 스키마)',
         },
         options: {
           type: 'object',
-          description: '검증할 계산 옵션 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '검증할 계산 옵션 (calculate_capital_gains_tax와 동일한 스키마)',
         },
       },
       required: ['property', 'transaction', 'owner'],
@@ -222,21 +236,25 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'explain_calculation',
-    description: '양도소득세 계산 과정과 적용 법령을 상세히 설명합니다. 세율, 공제, 비과세 요건 등의 근거를 제공합니다.',
+    description:
+      '양도소득세 계산 과정과 적용 법령을 상세히 설명합니다. 세율, 공제, 비과세 요건 등의 근거를 제공합니다.',
     inputSchema: {
       type: 'object',
       properties: {
         property: {
           type: 'object',
-          description: '설명할 부동산 정보 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '설명할 부동산 정보 (calculate_capital_gains_tax와 동일한 스키마)',
         },
         transaction: {
           type: 'object',
-          description: '설명할 거래 정보 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '설명할 거래 정보 (calculate_capital_gains_tax와 동일한 스키마)',
         },
         owner: {
           type: 'object',
-          description: '설명할 소유자 정보 (calculate_capital_gains_tax와 동일한 스키마)',
+          description:
+            '설명할 소유자 정보 (calculate_capital_gains_tax와 동일한 스키마)',
         },
       },
       required: ['property', 'transaction', 'owner'],
@@ -274,61 +292,81 @@ class CapitalGainsTaxServer {
     });
 
     // Handle tool calls
-    this.server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
-      const { name, arguments: args } = request.params;
+    this.server.setRequestHandler(
+      CallToolRequestSchema,
+      async (request: any) => {
+        const { name, arguments: args } = request.params;
 
-      try {
-        switch (name) {
-          case 'calculate_capital_gains_tax':
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(await calculateCapitalGainsTax(args as any), null, 2),
-                },
-              ],
-            };
+        try {
+          switch (name) {
+            case 'calculate_capital_gains_tax':
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(
+                      await calculateCapitalGainsTax(args as any),
+                      null,
+                      2
+                    ),
+                  },
+                ],
+              };
 
-          case 'validate_property_info':
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(await validatePropertyInfo(args as any), null, 2),
-                },
-              ],
-            };
+            case 'validate_property_info':
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(
+                      await validatePropertyInfo(args as any),
+                      null,
+                      2
+                    ),
+                  },
+                ],
+              };
 
-          case 'explain_calculation':
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(await explainCalculation(args as any), null, 2),
-                },
-              ],
-            };
+            case 'explain_calculation':
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(
+                      await explainCalculation(args as any),
+                      null,
+                      2
+                    ),
+                  },
+                ],
+              };
 
-          default:
-            throw new Error(`Unknown tool: ${name}`);
+            default:
+              throw new Error(`Unknown tool: ${name}`);
+          }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error occurred';
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(
+                  {
+                    error: true,
+                    message: errorMessage,
+                    tool: name,
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+            isError: true,
+          };
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                error: true,
-                message: errorMessage,
-                tool: name,
-              }, null, 2),
-            },
-          ],
-          isError: true,
-        };
       }
-    });
+    );
   }
 
   private setupErrorHandling(): void {
@@ -340,7 +378,7 @@ class CapitalGainsTaxServer {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    
+
     // Keep the process running
     process.on('SIGINT', async () => {
       await this.server.close();
@@ -362,7 +400,7 @@ export default main;
 
 // Start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
+  main().catch(error => {
     console.error('Failed to start server:', error);
     process.exit(1);
   });

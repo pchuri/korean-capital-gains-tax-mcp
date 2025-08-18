@@ -43,7 +43,12 @@ export class BaseCalculator {
   ): CalculationResult<CapitalGainsCalculation> {
     try {
       // 입력 데이터 검증
-      const validation = validateAllInputs(property, transaction, owner, options);
+      const validation = validateAllInputs(
+        property,
+        transaction,
+        owner,
+        options
+      );
       if (!validation.isValid) {
         return {
           success: false,
@@ -55,16 +60,25 @@ export class BaseCalculator {
       }
 
       // 계산 수행
-      const calculation = this.performCalculation(property, transaction, owner, options);
+      const calculation = this.performCalculation(
+        property,
+        transaction,
+        owner,
+        options
+      );
 
       return {
         success: true,
         data: calculation,
       };
     } catch (error) {
-      const taxError = error instanceof TaxCalculationError 
-        ? error 
-        : new TaxCalculationError('계산 중 오류가 발생했습니다', 'CALCULATION_ERROR');
+      const taxError =
+        error instanceof TaxCalculationError
+          ? error
+          : new TaxCalculationError(
+              '계산 중 오류가 발생했습니다',
+              'CALCULATION_ERROR'
+            );
 
       return {
         success: false,
@@ -100,7 +114,10 @@ export class BaseCalculator {
     );
 
     // 2. 양도차익 계산
-    const capitalGains = transaction.transferPrice - property.acquisitionPrice - totalNecessaryExpenses;
+    const capitalGains =
+      transaction.transferPrice -
+      property.acquisitionPrice -
+      totalNecessaryExpenses;
     steps.push({
       stepName: '양도차익 계산',
       formula: '양도가액 - 취득가액 - 필요경비',
@@ -110,9 +127,15 @@ export class BaseCalculator {
 
     // 3. 1세대 1주택 비과세 적용
     let taxableCapitalGains = capitalGains;
-    
-    if (owner.householdType === '1household1house' && this.meetsOneHouseExemptionRequirements(property, owner, transaction.transferDate)) {
-      
+
+    if (
+      owner.householdType === '1household1house' &&
+      this.meetsOneHouseExemptionRequirements(
+        property,
+        owner,
+        transaction.transferDate
+      )
+    ) {
       // 양도가액이 12억원 이하인 경우 완전 비과세
       if (transaction.transferPrice <= ONE_HOUSE_EXEMPTION_LIMIT) {
         taxableCapitalGains = 0;
@@ -128,7 +151,7 @@ export class BaseCalculator {
           amount: 0,
           description: `양도가액 ${transaction.transferPrice.toLocaleString()}원 ≤ 12억원으로 완전 비과세`,
         });
-      } 
+      }
       // 양도가액이 12억원 초과인 경우 비례과세
       else {
         taxableCapitalGains = calculateHighValueHouseTaxableGains(
@@ -153,11 +176,20 @@ export class BaseCalculator {
     }
 
     // 4. 장기보유특별공제 계산
-    const residenceYears = this.calculateResidenceYears(owner, transaction.transferDate);
-    const hasResidenceRequirement = owner.householdType === '1household1house' && residenceYears >= 2;
-    
-    const longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
-    const longTermDeduction = Math.floor(taxableCapitalGains * (longTermDeductionRate / 100));
+    const residenceYears = this.calculateResidenceYears(
+      owner,
+      transaction.transferDate
+    );
+    const hasResidenceRequirement =
+      owner.householdType === '1household1house' && residenceYears >= 2;
+
+    const longTermDeductionRate = getLongTermDeductionRate(
+      holdingYears,
+      hasResidenceRequirement
+    );
+    const longTermDeduction = Math.floor(
+      taxableCapitalGains * (longTermDeductionRate / 100)
+    );
 
     steps.push({
       stepName: '장기보유특별공제',
@@ -229,7 +261,9 @@ export class BaseCalculator {
   /**
    * 필요경비 총액 계산
    */
-  protected calculateTotalNecessaryExpenses(expenses: TransactionInfo['necessaryExpenses']): number {
+  protected calculateTotalNecessaryExpenses(
+    expenses: TransactionInfo['necessaryExpenses']
+  ): number {
     return (
       (expenses.brokerageFee ?? 0) +
       (expenses.improvementCosts ?? 0) +
@@ -243,8 +277,8 @@ export class BaseCalculator {
    * 1세대 1주택 비과세 요건 충족 여부
    */
   protected meetsOneHouseExemptionRequirements(
-    property: PropertyInfo, 
-    owner: OwnerInfo, 
+    property: PropertyInfo,
+    owner: OwnerInfo,
     transferDate: string
   ): boolean {
     if (owner.householdType !== '1household1house') {
@@ -269,7 +303,10 @@ export class BaseCalculator {
       );
 
       if (isAcquiredAfterRegulation) {
-        const residenceYears = this.calculateResidenceYears(owner, transferDate);
+        const residenceYears = this.calculateResidenceYears(
+          owner,
+          transferDate
+        );
         return residenceYears >= 2;
       }
     }
@@ -280,14 +317,18 @@ export class BaseCalculator {
   /**
    * 거주기간 계산
    */
-  protected calculateResidenceYears(owner: OwnerInfo, referenceDate: string): number {
+  protected calculateResidenceYears(
+    owner: OwnerInfo,
+    referenceDate: string
+  ): number {
     if (!owner.residencePeriod) {
       return 0;
     }
 
-    const endDate = owner.residencePeriod.end > referenceDate 
-      ? referenceDate 
-      : owner.residencePeriod.end;
+    const endDate =
+      owner.residencePeriod.end > referenceDate
+        ? referenceDate
+        : owner.residencePeriod.end;
 
     return calculateResidencePeriodYears(owner.residencePeriod.start, endDate);
   }

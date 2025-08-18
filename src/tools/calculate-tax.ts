@@ -2,7 +2,12 @@
  * Main capital gains tax calculation tool
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types/index.js';
+import {
+  PropertyInfo,
+  TransactionInfo,
+  OwnerInfo,
+  CalculationOptions,
+} from '../types/index.js';
 import { BaseCalculator } from '../calculators/base-calculator.js';
 
 export interface CalculateTaxParams {
@@ -21,7 +26,7 @@ export interface CalculateTaxParams {
  */
 export async function calculateCapitalGainsTax(params: CalculateTaxParams) {
   const calculator = new BaseCalculator();
-  
+
   const result = calculator.calculateCapitalGainsTax(
     params.property,
     params.transaction,
@@ -51,8 +56,12 @@ export async function calculateCapitalGainsTax(params: CalculateTaxParams) {
         설명: step.description,
       })),
       적용된감면: calculation.exemptions.map(exemption => ({
-        유형: exemption.type === 'full_exemption' ? '전액비과세' : 
-              exemption.type === 'partial_exemption' ? '일부비과세' : '세액감면',
+        유형:
+          exemption.type === 'full_exemption'
+            ? '전액비과세'
+            : exemption.type === 'partial_exemption'
+              ? '일부비과세'
+              : '세액감면',
         금액: `${exemption.amount.toLocaleString()}원`,
         근거: exemption.reason,
       })),

@@ -65,7 +65,7 @@ export interface CapitalGainsCalculation {
   calculationSteps: CalculationStep[];
 }
 
-export interface ValidationError {
+export interface FieldValidationError {
   /** 필드명 */
   field: string;
   /** 오류 메시지 */
@@ -86,7 +86,7 @@ export interface CalculationResult<T> {
     details?: Record<string, unknown>;
   };
   /** 유효성 검사 오류 */
-  validationErrors?: ValidationError[];
+  validationErrors?: FieldValidationError[];
 }
 
 export interface TaxCalculationParams {

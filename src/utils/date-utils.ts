@@ -5,7 +5,10 @@
 /**
  * 두 날짜 사이의 일수 계산
  */
-export function calculateDaysBetween(startDate: string, endDate: string): number {
+export function calculateDaysBetween(
+  startDate: string,
+  endDate: string
+): number {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const diffTime = Math.abs(end.getTime() - start.getTime());
@@ -15,32 +18,38 @@ export function calculateDaysBetween(startDate: string, endDate: string): number
 /**
  * 두 날짜 사이의 년수 계산 (소수점 포함)
  */
-export function calculateYearsBetween(startDate: string, endDate: string): number {
+export function calculateYearsBetween(
+  startDate: string,
+  endDate: string
+): number {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+
   // 정확한 년수 차이 계산
   let years = end.getFullYear() - start.getFullYear();
   const monthDiff = end.getMonth() - start.getMonth();
   const dayDiff = end.getDate() - start.getDate();
-  
+
   // 월/일을 고려하여 정확한 년수 계산
   if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
     years--;
   }
-  
+
   // 같은 날짜인 경우 0 반환
   if (start.getTime() === end.getTime()) {
     return 0;
   }
-  
+
   return Math.max(0, years);
 }
 
 /**
  * 보유기간 계산 (년 단위, 소수점 절사)
  */
-export function calculateHoldingPeriodYears(acquisitionDate: string, transferDate: string): number {
+export function calculateHoldingPeriodYears(
+  acquisitionDate: string,
+  transferDate: string
+): number {
   const years = calculateYearsBetween(acquisitionDate, transferDate);
   return Math.floor(years);
 }
@@ -48,7 +57,10 @@ export function calculateHoldingPeriodYears(acquisitionDate: string, transferDat
 /**
  * 거주기간 계산 (년 단위)
  */
-export function calculateResidencePeriodYears(residenceStart: string, residenceEnd: string): number {
+export function calculateResidencePeriodYears(
+  residenceStart: string,
+  residenceEnd: string
+): number {
   return calculateYearsBetween(residenceStart, residenceEnd);
 }
 
@@ -60,7 +72,7 @@ export function isValidDateFormat(dateString: string): boolean {
   if (!regex.test(dateString)) {
     return false;
   }
-  
+
   const date = new Date(dateString);
   return date instanceof Date && !isNaN(date.getTime());
 }
@@ -82,7 +94,10 @@ export function isDateAfter(date1: string, date2: string): boolean {
 /**
  * 특정 기준일 이후 취득 여부 확인
  */
-export function isAcquiredAfter(acquisitionDate: string, referenceDate: string): boolean {
+export function isAcquiredAfter(
+  acquisitionDate: string,
+  referenceDate: string
+): boolean {
   return isDateAfter(acquisitionDate, referenceDate);
 }
 
@@ -94,7 +109,9 @@ export function isTransferredWithinPeriod(
   startDate: string,
   endDate: string
 ): boolean {
-  return isDateAfter(transferDate, startDate) && isDateBefore(transferDate, endDate);
+  return (
+    isDateAfter(transferDate, startDate) && isDateBefore(transferDate, endDate)
+  );
 }
 
 /**

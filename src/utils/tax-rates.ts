@@ -65,7 +65,8 @@ export function getLongTermDeductionRate(
   }
 
   // 11년 이상인 경우 최고 구간 적용
-  const highestRate = LONG_TERM_DEDUCTION_RATES[LONG_TERM_DEDUCTION_RATES.length - 1]!;
+  const highestRate =
+    LONG_TERM_DEDUCTION_RATES[LONG_TERM_DEDUCTION_RATES.length - 1]!;
   return isOneHouseWithResidence && highestRate.residenceRate
     ? highestRate.residenceRate
     : highestRate.generalRate;
@@ -120,7 +121,10 @@ export function getFinalTaxRate(
   const basicRate = getMarginalTaxRate(taxableIncome);
 
   // 다주택자 중과세 가산
-  const surcharge = getMultipleHouseSurcharge(houseCount, isAdjustmentTargetArea);
+  const surcharge = getMultipleHouseSurcharge(
+    houseCount,
+    isAdjustmentTargetArea
+  );
 
   return Math.min(basicRate + surcharge, 70); // 최대 70%로 제한
 }
@@ -128,7 +132,10 @@ export function getFinalTaxRate(
 /**
  * 세액 계산 (정액세율 적용)
  */
-export function calculateFlatTax(taxableIncome: number, taxRate: number): number {
+export function calculateFlatTax(
+  taxableIncome: number,
+  taxRate: number
+): number {
   return Math.floor(taxableIncome * (taxRate / 100));
 }
 
