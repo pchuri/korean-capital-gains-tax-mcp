@@ -33,7 +33,7 @@ jobs:
         run: npm run typecheck
 
       - name: Lint
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Run tests with coverage
         run: npm run test:coverage
