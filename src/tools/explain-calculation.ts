@@ -3,6 +3,7 @@
  */
 
 import { PropertyInfo, TransactionInfo, OwnerInfo } from '../types/index.js';
+import type { StepId } from '../types/index.js';
 import {
   calculateHoldingPeriodYears,
   calculateResidencePeriodYears,
@@ -12,6 +13,7 @@ import {
   getFinalTaxRate,
 } from '../utils/tax-rates.js';
 import { ONE_HOUSE_EXEMPTION_LIMIT } from '../utils/constants.js';
+import { STEP_IDS, STEP_LABELS } from '../utils/step-labels.js';
 
 export interface ExplainCalculationParams {
   /** 부동산 정보 */
@@ -25,6 +27,7 @@ export interface ExplainCalculationParams {
 export interface ExplainCalculationOutput {
   계산개요: {
     양도소득세_계산_공식: string[];
+    단계: Array<{ id: StepId; 라벨: string }>;
   };
   기본정보: {
     부동산유형: string;
@@ -86,6 +89,14 @@ export async function explainCalculation(
     property.location.isAdjustmentTargetArea
   );
 
+  // 공식 설명에 대응하는 불변 단계 ID 시퀀스
+  const overviewStepIds: StepId[] = [
+    STEP_IDS.CAPITAL_GAINS,
+    STEP_IDS.TAXABLE_GAINS,
+    STEP_IDS.TAX_BASE,
+    STEP_IDS.CALCULATED_TAX,
+  ];
+
   return {
     계산개요: {
       양도소득세_계산_공식: [
@@ -94,6 +105,7 @@ export async function explainCalculation(
         '3단계: 양도소득과세표준 = 양도소득금액 - 기본공제(250만원)',
         '4단계: 산출세액 = 과세표준 × 세율',
       ],
+      단계: overviewStepIds.map((id) => ({ id, 라벨: STEP_LABELS[id] })),
     },
 
     기본정보: {

@@ -42,9 +42,14 @@ export function getMarginalTaxRate(taxableIncome: number): number {
     }
   }
 
-  // 최고 구간 (배열이 비어있는 경우 0 반환)
-  const last = BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1];
-  return last ? last.rate : 0;
+  // 설정 검증: 세율표가 비어있다면 구성 오류로 간주
+  if (BASIC_TAX_RATES.length === 0) {
+    throw new Error('BASIC_TAX_RATES misconfigured: empty');
+  }
+
+  // 최고 구간
+  const last = BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1]!;
+  return last.rate;
 }
 
 /**

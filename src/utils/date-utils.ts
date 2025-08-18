@@ -119,8 +119,7 @@ export function isTransferredWithinPeriod(
  */
 export function getCurrentDate(): string {
   const iso = new Date().toISOString();
-  const parts = iso.split('T');
-  return parts[0] ?? iso;
+  return iso.substring(0, 10);
 }
 
 /**
@@ -130,6 +129,5 @@ export function addYearsToDate(dateString: string, years: number): string {
   const date = new Date(dateString);
   date.setFullYear(date.getFullYear() + years);
   const iso = date.toISOString();
-  const parts = iso.split('T');
-  return parts[0] ?? iso;
+  return iso.substring(0, 10);
 }

@@ -30,6 +30,7 @@ import {
   calculateHighValueHouseTaxableGains,
 } from '../utils/tax-rates.js';
 import { validateAllInputs } from '../utils/validators.js';
+import { STEP_IDS, STEP_LABELS } from '../utils/step-labels.js';
 
 export class BaseCalculator {
   /**
@@ -119,7 +120,8 @@ export class BaseCalculator {
       property.acquisitionPrice -
       totalNecessaryExpenses;
     steps.push({
-      stepName: '양도차익 계산',
+      stepId: STEP_IDS.CAPITAL_GAINS,
+      stepName: STEP_LABELS[STEP_IDS.CAPITAL_GAINS],
       formula: '양도가액 - 취득가액 - 필요경비',
       amount: capitalGains,
       description: `${transaction.transferPrice.toLocaleString()}원 - ${property.acquisitionPrice.toLocaleString()}원 - ${totalNecessaryExpenses.toLocaleString()}원`,
@@ -146,7 +148,8 @@ export class BaseCalculator {
         });
 
         steps.push({
-          stepName: '1세대 1주택 완전 비과세',
+          stepId: STEP_IDS.ONE_HOUSE_FULL_EXEMPTION,
+          stepName: STEP_LABELS[STEP_IDS.ONE_HOUSE_FULL_EXEMPTION],
           formula: '양도가액 ≤ 12억원',
           amount: 0,
           description: `양도가액 ${transaction.transferPrice.toLocaleString()}원 ≤ 12억원으로 완전 비과세`,
@@ -167,7 +170,8 @@ export class BaseCalculator {
         });
 
         steps.push({
-          stepName: '1세대 1주택 비례과세',
+          stepId: STEP_IDS.ONE_HOUSE_PARTIAL_EXEMPTION,
+          stepName: STEP_LABELS[STEP_IDS.ONE_HOUSE_PARTIAL_EXEMPTION],
           formula: '양도차익 × (양도가액 - 12억원) / 양도가액',
           amount: taxableCapitalGains,
           description: `고가주택 과세대상: ${taxableCapitalGains.toLocaleString()}원`,
@@ -192,7 +196,8 @@ export class BaseCalculator {
     );
 
     steps.push({
-      stepName: '장기보유특별공제',
+      stepId: STEP_IDS.LONG_TERM_DEDUCTION,
+      stepName: STEP_LABELS[STEP_IDS.LONG_TERM_DEDUCTION],
       formula: `과세대상 양도차익 × ${longTermDeductionRate}%`,
       amount: longTermDeduction,
       description: `보유기간 ${holdingYears}년${hasResidenceRequirement ? ' (거주)' : ''} 적용`,
@@ -201,7 +206,8 @@ export class BaseCalculator {
     // 5. 양도소득금액 계산
     const taxableGains = Math.max(0, taxableCapitalGains - longTermDeduction);
     steps.push({
-      stepName: '양도소득금액',
+      stepId: STEP_IDS.TAXABLE_GAINS,
+      stepName: STEP_LABELS[STEP_IDS.TAXABLE_GAINS],
       formula: '과세대상 양도차익 - 장기보유특별공제',
       amount: taxableGains,
       description: `${taxableCapitalGains.toLocaleString()}원 - ${longTermDeduction.toLocaleString()}원`,
@@ -210,7 +216,8 @@ export class BaseCalculator {
     // 6. 양도소득과세표준 계산
     const taxableIncome = Math.max(0, taxableGains - BASIC_DEDUCTION);
     steps.push({
-      stepName: '양도소득과세표준',
+      stepId: STEP_IDS.TAX_BASE,
+      stepName: STEP_LABELS[STEP_IDS.TAX_BASE],
       formula: '양도소득금액 - 기본공제(250만원)',
       amount: taxableIncome,
       description: `${taxableGains.toLocaleString()}원 - ${BASIC_DEDUCTION.toLocaleString()}원`,
@@ -235,7 +242,8 @@ export class BaseCalculator {
     }
 
     steps.push({
-      stepName: '산출세액',
+      stepId: STEP_IDS.CALCULATED_TAX,
+      stepName: STEP_LABELS[STEP_IDS.CALCULATED_TAX],
       formula: `과세표준 × ${applicableTaxRate}%`,
       amount: calculatedTax,
       description: `${applicableTaxRate >= 40 ? '중과세율' : '기본세율'} 적용`,
