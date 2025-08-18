@@ -48,7 +48,11 @@ export function getMarginalTaxRate(taxableIncome: number): number {
   }
 
   // 최고 구간
-  const last = BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1]!;
+  const last = BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1];
+  if (!last) {
+    // 타입 안전을 위해 이중 방어 (실제로 도달하지 않음)
+    throw new Error('BASIC_TAX_RATES missing highest bracket');
+  }
   return last.rate;
 }
 
