@@ -22,12 +22,34 @@ export interface ExplainCalculationParams {
   owner: OwnerInfo;
 }
 
+export interface ExplainCalculationOutput {
+  계산개요: {
+    양도소득세_계산_공식: string[];
+  };
+  기본정보: {
+    부동산유형: string;
+    소재지: string;
+    조정대상지역: string;
+    보유기간: string;
+    세대구성: string;
+    거주기간: string;
+  };
+  적용법규: {
+    장기보유특별공제: {
+      적용공제율: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  주의사항: string[];
+  관련법령: Record<string, string[]>;
+}
 /**
  * 양도소득세 계산 과정 상세 설명
  */
 export async function explainCalculation(
   params: ExplainCalculationParams
-): Promise<Record<string, unknown>> {
+): Promise<ExplainCalculationOutput> {
   const { property, transaction, owner } = params;
 
   // 기본 계산 정보

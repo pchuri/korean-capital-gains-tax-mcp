@@ -21,12 +21,19 @@ export interface ValidatePropertyParams {
   options?: CalculationOptions;
 }
 
+export interface ValidatePropertyResult {
+  유효성: string;
+  검증결과?: Record<string, string>;
+  오류목록?: Array<{ 필드: string; 메시지: string; 코드: string }>;
+  카테고리별오류?: Record<string, string[]>;
+}
+
 /**
  * 입력된 부동산 정보의 유효성 검증
  */
 export async function validatePropertyInfo(
   params: ValidatePropertyParams
-): Promise<Record<string, unknown>> {
+): Promise<ValidatePropertyResult> {
   const validation = validateAllInputs(
     params.property,
     params.transaction,
