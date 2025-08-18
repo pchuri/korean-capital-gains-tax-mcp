@@ -23,6 +23,8 @@ export interface LongTermDeductionRate {
 }
 
 export interface CalculationStep {
+  /** 단계 ID (변경 불가 식별자) */
+  stepId: StepId;
   /** 단계 이름 */
   stepName: string;
   /** 계산 공식 */
@@ -65,7 +67,19 @@ export interface CapitalGainsCalculation {
   calculationSteps: CalculationStep[];
 }
 
-export interface ValidationError {
+/**
+ * 계산 단계 ID 타입 (불변 키)
+ */
+export type StepId =
+  | 'capital_gains'
+  | 'one_house_full_exemption'
+  | 'one_house_partial_exemption'
+  | 'long_term_deduction'
+  | 'taxable_gains'
+  | 'tax_base'
+  | 'calculated_tax';
+
+export interface FieldValidationError {
   /** 필드명 */
   field: string;
   /** 오류 메시지 */
@@ -86,7 +100,7 @@ export interface CalculationResult<T> {
     details?: Record<string, unknown>;
   };
   /** 유효성 검사 오류 */
-  validationErrors?: ValidationError[];
+  validationErrors?: FieldValidationError[];
 }
 
 export interface TaxCalculationParams {

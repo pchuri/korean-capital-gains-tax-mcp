@@ -42,8 +42,18 @@ export function getMarginalTaxRate(taxableIncome: number): number {
     }
   }
 
+  // 설정 검증: 세율표가 비어있다면 구성 오류로 간주
+  if (BASIC_TAX_RATES.length === 0) {
+    throw new Error('BASIC_TAX_RATES misconfigured: empty');
+  }
+
   // 최고 구간
-  return BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1]!.rate;
+  const last = BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1];
+  if (!last) {
+    // 타입 안전을 위해 이중 방어 (실제로 도달하지 않음)
+    throw new Error('BASIC_TAX_RATES missing highest bracket');
+  }
+  return last.rate;
 }
 
 /**
@@ -65,7 +75,9 @@ export function getLongTermDeductionRate(
   }
 
   // 11년 이상인 경우 최고 구간 적용
-  const highestRate = LONG_TERM_DEDUCTION_RATES[LONG_TERM_DEDUCTION_RATES.length - 1]!;
+  const highestRate =
+    LONG_TERM_DEDUCTION_RATES[LONG_TERM_DEDUCTION_RATES.length - 1];
+  if (!highestRate) return 0;
   return isOneHouseWithResidence && highestRate.residenceRate
     ? highestRate.residenceRate
     : highestRate.generalRate;
@@ -120,7 +132,10 @@ export function getFinalTaxRate(
   const basicRate = getMarginalTaxRate(taxableIncome);
 
   // 다주택자 중과세 가산
-  const surcharge = getMultipleHouseSurcharge(houseCount, isAdjustmentTargetArea);
+  const surcharge = getMultipleHouseSurcharge(
+    houseCount,
+    isAdjustmentTargetArea
+  );
 
   return Math.min(basicRate + surcharge, 70); // 최대 70%로 제한
 }
@@ -128,7 +143,10 @@ export function getFinalTaxRate(
 /**
  * 세액 계산 (정액세율 적용)
  */
-export function calculateFlatTax(taxableIncome: number, taxRate: number): number {
+export function calculateFlatTax(
+  taxableIncome: number,
+  taxRate: number
+): number {
   return Math.floor(taxableIncome * (taxRate / 100));
 }
 

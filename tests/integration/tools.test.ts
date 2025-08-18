@@ -50,7 +50,29 @@ describe('MCP Tools Integration', () => {
       
       expect(result.summary.최종세액).toMatch(/\d+원$/);
       expect(result.summary.양도차익).toMatch(/\d+원$/);
-      expect(result.details.계산단계).toHaveLength(5);
+
+      const stepIds = result.details.계산단계.map((s) => s.id);
+      // 핵심 단계 포함 여부 확인 (불변 ID로 검증)
+      {
+        const { STEP_IDS } = await import('../../src/utils/step-labels');
+
+        expect(stepIds).toEqual(
+          expect.arrayContaining([
+            STEP_IDS.CAPITAL_GAINS,
+            STEP_IDS.LONG_TERM_DEDUCTION,
+            STEP_IDS.TAX_BASE,
+            STEP_IDS.CALCULATED_TAX,
+          ])
+        );
+        // 비과세 관련 단계(둘 중 하나)는 반드시 존재해야 함
+        expect(
+          stepIds.some(
+            (id) =>
+              id === STEP_IDS.ONE_HOUSE_PARTIAL_EXEMPTION ||
+              id === STEP_IDS.ONE_HOUSE_FULL_EXEMPTION
+          )
+        ).toBe(true);
+      }
     });
 
     test('should handle multiple house surcharge', async () => {

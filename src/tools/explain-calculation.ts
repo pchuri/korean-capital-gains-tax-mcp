@@ -3,9 +3,17 @@
  */
 
 import { PropertyInfo, TransactionInfo, OwnerInfo } from '../types/index.js';
-import { calculateHoldingPeriodYears, calculateResidencePeriodYears } from '../utils/date-utils.js';
-import { getLongTermDeductionRate, getFinalTaxRate } from '../utils/tax-rates.js';
+import type { StepId } from '../types/index.js';
+import {
+  calculateHoldingPeriodYears,
+  calculateResidencePeriodYears,
+} from '../utils/date-utils.js';
+import {
+  getLongTermDeductionRate,
+  getFinalTaxRate,
+} from '../utils/tax-rates.js';
 import { ONE_HOUSE_EXEMPTION_LIMIT } from '../utils/constants.js';
+import { STEP_IDS, STEP_LABELS } from '../utils/step-labels.js';
 
 export interface ExplainCalculationParams {
   /** 부동산 정보 */
@@ -16,10 +24,35 @@ export interface ExplainCalculationParams {
   owner: OwnerInfo;
 }
 
+export interface ExplainCalculationOutput {
+  계산개요: {
+    양도소득세_계산_공식: string[];
+    단계: Array<{ id: StepId; 라벨: string }>;
+  };
+  기본정보: {
+    부동산유형: string;
+    소재지: string;
+    조정대상지역: string;
+    보유기간: string;
+    세대구성: string;
+    거주기간: string;
+  };
+  적용법규: {
+    장기보유특별공제: {
+      적용공제율: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  주의사항: string[];
+  관련법령: Record<string, string[]>;
+}
 /**
  * 양도소득세 계산 과정 상세 설명
  */
-export async function explainCalculation(params: ExplainCalculationParams) {
+export async function explainCalculation(
+  params: ExplainCalculationParams
+): Promise<ExplainCalculationOutput> {
   const { property, transaction, owner } = params;
 
   // 기본 계산 정보
@@ -35,11 +68,19 @@ export async function explainCalculation(params: ExplainCalculationParams) {
       )
     : 0;
 
-  const hasResidenceRequirement = owner.householdType === '1household1house' && residenceYears >= 2;
-  const longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
+  const hasResidenceRequirement =
+    owner.householdType === '1household1house' && residenceYears >= 2;
+  const longTermDeductionRate = getLongTermDeductionRate(
+    holdingYears,
+    hasResidenceRequirement
+  );
 
-  const houseCount = owner.householdType === '1household1house' ? 1 : 
-                    owner.householdType === 'temporary2house' ? 2 : 3;
+  const houseCount =
+    owner.householdType === '1household1house'
+      ? 1
+      : owner.householdType === 'temporary2house'
+        ? 2
+        : 3;
 
   const applicableTaxRate = getFinalTaxRate(
     1000000, // 임시값
@@ -47,6 +88,14 @@ export async function explainCalculation(params: ExplainCalculationParams) {
     houseCount,
     property.location.isAdjustmentTargetArea
   );
+
+  // 공식 설명에 대응하는 불변 단계 ID 시퀀스
+  const overviewStepIds: StepId[] = [
+    STEP_IDS.CAPITAL_GAINS,
+    STEP_IDS.TAXABLE_GAINS,
+    STEP_IDS.TAX_BASE,
+    STEP_IDS.CALCULATED_TAX,
+  ];
 
   return {
     계산개요: {
@@ -56,18 +105,30 @@ export async function explainCalculation(params: ExplainCalculationParams) {
         '3단계: 양도소득과세표준 = 양도소득금액 - 기본공제(250만원)',
         '4단계: 산출세액 = 과세표준 × 세율',
       ],
+      단계: overviewStepIds.map(id => ({ id, 라벨: STEP_LABELS[id] })),
     },
-    
+
     기본정보: {
-      부동산유형: property.type === 'apartment' ? '아파트' :
-                 property.type === 'house' ? '주택' :
-                 property.type === 'land' ? '토지' : '상업용부동산',
+      부동산유형:
+        property.type === 'apartment'
+          ? '아파트'
+          : property.type === 'house'
+            ? '주택'
+            : property.type === 'land'
+              ? '토지'
+              : '상업용부동산',
       소재지: `${property.location.city} ${property.location.district}`,
       조정대상지역: property.location.isAdjustmentTargetArea ? '예' : '아니오',
       보유기간: `${holdingYears}년`,
-      세대구성: owner.householdType === '1household1house' ? '1세대 1주택' :
-               owner.householdType === 'temporary2house' ? '일시적 2주택' : '다주택',
-      거주기간: owner.residencePeriod ? `${residenceYears.toFixed(1)}년` : '해당없음',
+      세대구성:
+        owner.householdType === '1household1house'
+          ? '1세대 1주택'
+          : owner.householdType === 'temporary2house'
+            ? '일시적 2주택'
+            : '다주택',
+      거주기간: owner.residencePeriod
+        ? `${residenceYears.toFixed(1)}년`
+        : '해당없음',
     },
 
     적용법규: {
@@ -75,36 +136,40 @@ export async function explainCalculation(params: ExplainCalculationParams) {
         보유기간: `${holdingYears}년`,
         적용공제율: `${longTermDeductionRate}%`,
         거주가산: hasResidenceRequirement ? '적용' : '미적용',
-        설명: holdingYears < 3 
-          ? '보유기간 3년 미만으로 장기보유특별공제 해당없음'
-          : `보유기간 ${holdingYears}년으로 ${longTermDeductionRate}% 공제 적용`
+        설명:
+          holdingYears < 3
+            ? '보유기간 3년 미만으로 장기보유특별공제 해당없음'
+            : `보유기간 ${holdingYears}년으로 ${longTermDeductionRate}% 공제 적용`,
       },
 
       세율적용: {
-        기본정보: applicableTaxRate >= 40 
-          ? '중과세율 적용 (단기보유 또는 다주택자)'
-          : '일반세율 적용 (누진세)',
+        기본정보:
+          applicableTaxRate >= 40
+            ? '중과세율 적용 (단기보유 또는 다주택자)'
+            : '일반세율 적용 (누진세)',
         적용세율: `${applicableTaxRate}%`,
-        중과사유: applicableTaxRate >= 40 
-          ? holdingYears < 2 
-            ? '단기보유 중과세'
-            : '다주택자 중과세'
-          : '해당없음',
+        중과사유:
+          applicableTaxRate >= 40
+            ? holdingYears < 2
+              ? '단기보유 중과세'
+              : '다주택자 중과세'
+            : '해당없음',
       },
 
       비과세감면: {
-        '1세대_1주택_비과세': owner.householdType === '1household1house'
-          ? {
-              적용여부: '검토대상',
-              요건: [
-                `보유기간 2년 이상: ${holdingYears >= 2 ? '충족' : '미충족'}`,
-                property.location.isAdjustmentTargetArea 
-                  ? `거주기간 2년 이상: ${residenceYears >= 2 ? '충족' : '미충족'}`
-                  : '거주요건: 해당없음 (비조정대상지역)',
-              ],
-              비과세한도: `${ONE_HOUSE_EXEMPTION_LIMIT.toLocaleString()}원`,
-            }
-          : '해당없음 (다주택자)',
+        '1세대_1주택_비과세':
+          owner.householdType === '1household1house'
+            ? {
+                적용여부: '검토대상',
+                요건: [
+                  `보유기간 2년 이상: ${holdingYears >= 2 ? '충족' : '미충족'}`,
+                  property.location.isAdjustmentTargetArea
+                    ? `거주기간 2년 이상: ${residenceYears >= 2 ? '충족' : '미충족'}`
+                    : '거주요건: 해당없음 (비조정대상지역)',
+                ],
+                비과세한도: `${ONE_HOUSE_EXEMPTION_LIMIT.toLocaleString()}원`,
+              }
+            : '해당없음 (다주택자)',
       },
     },
 

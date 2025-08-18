@@ -2,7 +2,12 @@
  * Input validation utilities
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types/index.js';
+import {
+  PropertyInfo,
+  TransactionInfo,
+  OwnerInfo,
+  CalculationOptions,
+} from '../types/index.js';
 import { ERROR_CODES } from './constants.js';
 import { isValidDateFormat, isDateBefore } from './date-utils.js';
 
@@ -189,7 +194,11 @@ export function validateOwnerInfo(owner: OwnerInfo): ValidationResult {
   const errors: Array<{ field: string; message: string; code: string }> = [];
 
   // 세대 유형 검사
-  const validHouseholdTypes = ['1household1house', 'multiple', 'temporary2house'];
+  const validHouseholdTypes = [
+    '1household1house',
+    'multiple',
+    'temporary2house',
+  ];
   if (!validHouseholdTypes.includes(owner.householdType)) {
     errors.push({
       field: 'owner.householdType',
@@ -249,7 +258,9 @@ export function validateOwnerInfo(owner: OwnerInfo): ValidationResult {
 /**
  * 계산 옵션 유효성 검사
  */
-export function validateCalculationOptions(options?: CalculationOptions): ValidationResult {
+export function validateCalculationOptions(
+  options?: CalculationOptions
+): ValidationResult {
   const errors: Array<{ field: string; message: string; code: string }> = [];
 
   if (!options) {

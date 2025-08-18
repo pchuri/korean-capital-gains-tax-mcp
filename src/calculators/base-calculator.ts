@@ -30,6 +30,7 @@ import {
   calculateHighValueHouseTaxableGains,
 } from '../utils/tax-rates.js';
 import { validateAllInputs } from '../utils/validators.js';
+import { STEP_IDS, STEP_LABELS } from '../utils/step-labels.js';
 
 export class BaseCalculator {
   /**
@@ -43,7 +44,12 @@ export class BaseCalculator {
   ): CalculationResult<CapitalGainsCalculation> {
     try {
       // 입력 데이터 검증
-      const validation = validateAllInputs(property, transaction, owner, options);
+      const validation = validateAllInputs(
+        property,
+        transaction,
+        owner,
+        options
+      );
       if (!validation.isValid) {
         return {
           success: false,
@@ -55,16 +61,25 @@ export class BaseCalculator {
       }
 
       // 계산 수행
-      const calculation = this.performCalculation(property, transaction, owner, options);
+      const calculation = this.performCalculation(
+        property,
+        transaction,
+        owner,
+        options
+      );
 
       return {
         success: true,
         data: calculation,
       };
     } catch (error) {
-      const taxError = error instanceof TaxCalculationError 
-        ? error 
-        : new TaxCalculationError('계산 중 오류가 발생했습니다', 'CALCULATION_ERROR');
+      const taxError =
+        error instanceof TaxCalculationError
+          ? error
+          : new TaxCalculationError(
+              '계산 중 오류가 발생했습니다',
+              'CALCULATION_ERROR'
+            );
 
       return {
         success: false,
@@ -100,9 +115,13 @@ export class BaseCalculator {
     );
 
     // 2. 양도차익 계산
-    const capitalGains = transaction.transferPrice - property.acquisitionPrice - totalNecessaryExpenses;
+    const capitalGains =
+      transaction.transferPrice -
+      property.acquisitionPrice -
+      totalNecessaryExpenses;
     steps.push({
-      stepName: '양도차익 계산',
+      stepId: STEP_IDS.CAPITAL_GAINS,
+      stepName: STEP_LABELS[STEP_IDS.CAPITAL_GAINS],
       formula: '양도가액 - 취득가액 - 필요경비',
       amount: capitalGains,
       description: `${transaction.transferPrice.toLocaleString()}원 - ${property.acquisitionPrice.toLocaleString()}원 - ${totalNecessaryExpenses.toLocaleString()}원`,
@@ -110,9 +129,15 @@ export class BaseCalculator {
 
     // 3. 1세대 1주택 비과세 적용
     let taxableCapitalGains = capitalGains;
-    
-    if (owner.householdType === '1household1house' && this.meetsOneHouseExemptionRequirements(property, owner, transaction.transferDate)) {
-      
+
+    if (
+      owner.householdType === '1household1house' &&
+      this.meetsOneHouseExemptionRequirements(
+        property,
+        owner,
+        transaction.transferDate
+      )
+    ) {
       // 양도가액이 12억원 이하인 경우 완전 비과세
       if (transaction.transferPrice <= ONE_HOUSE_EXEMPTION_LIMIT) {
         taxableCapitalGains = 0;
@@ -123,12 +148,13 @@ export class BaseCalculator {
         });
 
         steps.push({
-          stepName: '1세대 1주택 완전 비과세',
+          stepId: STEP_IDS.ONE_HOUSE_FULL_EXEMPTION,
+          stepName: STEP_LABELS[STEP_IDS.ONE_HOUSE_FULL_EXEMPTION],
           formula: '양도가액 ≤ 12억원',
           amount: 0,
           description: `양도가액 ${transaction.transferPrice.toLocaleString()}원 ≤ 12억원으로 완전 비과세`,
         });
-      } 
+      }
       // 양도가액이 12억원 초과인 경우 비례과세
       else {
         taxableCapitalGains = calculateHighValueHouseTaxableGains(
@@ -144,7 +170,8 @@ export class BaseCalculator {
         });
 
         steps.push({
-          stepName: '1세대 1주택 비례과세',
+          stepId: STEP_IDS.ONE_HOUSE_PARTIAL_EXEMPTION,
+          stepName: STEP_LABELS[STEP_IDS.ONE_HOUSE_PARTIAL_EXEMPTION],
           formula: '양도차익 × (양도가액 - 12억원) / 양도가액',
           amount: taxableCapitalGains,
           description: `고가주택 과세대상: ${taxableCapitalGains.toLocaleString()}원`,
@@ -153,14 +180,24 @@ export class BaseCalculator {
     }
 
     // 4. 장기보유특별공제 계산
-    const residenceYears = this.calculateResidenceYears(owner, transaction.transferDate);
-    const hasResidenceRequirement = owner.householdType === '1household1house' && residenceYears >= 2;
-    
-    const longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
-    const longTermDeduction = Math.floor(taxableCapitalGains * (longTermDeductionRate / 100));
+    const residenceYears = this.calculateResidenceYears(
+      owner,
+      transaction.transferDate
+    );
+    const hasResidenceRequirement =
+      owner.householdType === '1household1house' && residenceYears >= 2;
+
+    const longTermDeductionRate = getLongTermDeductionRate(
+      holdingYears,
+      hasResidenceRequirement
+    );
+    const longTermDeduction = Math.floor(
+      taxableCapitalGains * (longTermDeductionRate / 100)
+    );
 
     steps.push({
-      stepName: '장기보유특별공제',
+      stepId: STEP_IDS.LONG_TERM_DEDUCTION,
+      stepName: STEP_LABELS[STEP_IDS.LONG_TERM_DEDUCTION],
       formula: `과세대상 양도차익 × ${longTermDeductionRate}%`,
       amount: longTermDeduction,
       description: `보유기간 ${holdingYears}년${hasResidenceRequirement ? ' (거주)' : ''} 적용`,
@@ -169,7 +206,8 @@ export class BaseCalculator {
     // 5. 양도소득금액 계산
     const taxableGains = Math.max(0, taxableCapitalGains - longTermDeduction);
     steps.push({
-      stepName: '양도소득금액',
+      stepId: STEP_IDS.TAXABLE_GAINS,
+      stepName: STEP_LABELS[STEP_IDS.TAXABLE_GAINS],
       formula: '과세대상 양도차익 - 장기보유특별공제',
       amount: taxableGains,
       description: `${taxableCapitalGains.toLocaleString()}원 - ${longTermDeduction.toLocaleString()}원`,
@@ -178,7 +216,8 @@ export class BaseCalculator {
     // 6. 양도소득과세표준 계산
     const taxableIncome = Math.max(0, taxableGains - BASIC_DEDUCTION);
     steps.push({
-      stepName: '양도소득과세표준',
+      stepId: STEP_IDS.TAX_BASE,
+      stepName: STEP_LABELS[STEP_IDS.TAX_BASE],
       formula: '양도소득금액 - 기본공제(250만원)',
       amount: taxableIncome,
       description: `${taxableGains.toLocaleString()}원 - ${BASIC_DEDUCTION.toLocaleString()}원`,
@@ -203,7 +242,8 @@ export class BaseCalculator {
     }
 
     steps.push({
-      stepName: '산출세액',
+      stepId: STEP_IDS.CALCULATED_TAX,
+      stepName: STEP_LABELS[STEP_IDS.CALCULATED_TAX],
       formula: `과세표준 × ${applicableTaxRate}%`,
       amount: calculatedTax,
       description: `${applicableTaxRate >= 40 ? '중과세율' : '기본세율'} 적용`,
@@ -229,7 +269,9 @@ export class BaseCalculator {
   /**
    * 필요경비 총액 계산
    */
-  protected calculateTotalNecessaryExpenses(expenses: TransactionInfo['necessaryExpenses']): number {
+  protected calculateTotalNecessaryExpenses(
+    expenses: TransactionInfo['necessaryExpenses']
+  ): number {
     return (
       (expenses.brokerageFee ?? 0) +
       (expenses.improvementCosts ?? 0) +
@@ -243,8 +285,8 @@ export class BaseCalculator {
    * 1세대 1주택 비과세 요건 충족 여부
    */
   protected meetsOneHouseExemptionRequirements(
-    property: PropertyInfo, 
-    owner: OwnerInfo, 
+    property: PropertyInfo,
+    owner: OwnerInfo,
     transferDate: string
   ): boolean {
     if (owner.householdType !== '1household1house') {
@@ -269,7 +311,10 @@ export class BaseCalculator {
       );
 
       if (isAcquiredAfterRegulation) {
-        const residenceYears = this.calculateResidenceYears(owner, transferDate);
+        const residenceYears = this.calculateResidenceYears(
+          owner,
+          transferDate
+        );
         return residenceYears >= 2;
       }
     }
@@ -280,14 +325,18 @@ export class BaseCalculator {
   /**
    * 거주기간 계산
    */
-  protected calculateResidenceYears(owner: OwnerInfo, referenceDate: string): number {
+  protected calculateResidenceYears(
+    owner: OwnerInfo,
+    referenceDate: string
+  ): number {
     if (!owner.residencePeriod) {
       return 0;
     }
 
-    const endDate = owner.residencePeriod.end > referenceDate 
-      ? referenceDate 
-      : owner.residencePeriod.end;
+    const endDate =
+      owner.residencePeriod.end > referenceDate
+        ? referenceDate
+        : owner.residencePeriod.end;
 
     return calculateResidencePeriodYears(owner.residencePeriod.start, endDate);
   }

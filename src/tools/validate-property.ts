@@ -2,7 +2,12 @@
  * Property validation tool
  */
 
-import { PropertyInfo, TransactionInfo, OwnerInfo, CalculationOptions } from '../types/index.js';
+import {
+  PropertyInfo,
+  TransactionInfo,
+  OwnerInfo,
+  CalculationOptions,
+} from '../types/index.js';
 import { validateAllInputs } from '../utils/validators.js';
 
 export interface ValidatePropertyParams {
@@ -16,10 +21,19 @@ export interface ValidatePropertyParams {
   options?: CalculationOptions;
 }
 
+export interface ValidatePropertyResult {
+  유효성: string;
+  검증결과?: Record<string, string>;
+  오류목록?: Array<{ 필드: string; 메시지: string; 코드: string }>;
+  카테고리별오류?: Record<string, string[]>;
+}
+
 /**
  * 입력된 부동산 정보의 유효성 검증
  */
-export async function validatePropertyInfo(params: ValidatePropertyParams) {
+export async function validatePropertyInfo(
+  params: ValidatePropertyParams
+): Promise<ValidatePropertyResult> {
   const validation = validateAllInputs(
     params.property,
     params.transaction,
@@ -54,18 +68,22 @@ export async function validatePropertyInfo(params: ValidatePropertyParams) {
       코드: error.code,
     })),
     카테고리별오류: {
-      부동산정보: errorsByCategory.부동산정보.length > 0 
-        ? errorsByCategory.부동산정보.map(e => e.message)
-        : ['✅ 유효'],
-      거래정보: errorsByCategory.거래정보.length > 0 
-        ? errorsByCategory.거래정보.map(e => e.message)
-        : ['✅ 유효'],
-      소유자정보: errorsByCategory.소유자정보.length > 0 
-        ? errorsByCategory.소유자정보.map(e => e.message)
-        : ['✅ 유효'],
-      계산옵션: errorsByCategory.계산옵션.length > 0 
-        ? errorsByCategory.계산옵션.map(e => e.message)
-        : ['✅ 유효'],
+      부동산정보:
+        errorsByCategory.부동산정보.length > 0
+          ? errorsByCategory.부동산정보.map(e => e.message)
+          : ['✅ 유효'],
+      거래정보:
+        errorsByCategory.거래정보.length > 0
+          ? errorsByCategory.거래정보.map(e => e.message)
+          : ['✅ 유효'],
+      소유자정보:
+        errorsByCategory.소유자정보.length > 0
+          ? errorsByCategory.소유자정보.map(e => e.message)
+          : ['✅ 유효'],
+      계산옵션:
+        errorsByCategory.계산옵션.length > 0
+          ? errorsByCategory.계산옵션.map(e => e.message)
+          : ['✅ 유효'],
     },
   };
 }
