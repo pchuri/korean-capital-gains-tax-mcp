@@ -4,6 +4,10 @@ export default {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  // Map ESM-style .js imports in TS to the source TS files during tests
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       useESM: true
