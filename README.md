@@ -5,6 +5,7 @@
 TypeScript로 구현된 한국 부동산 양도소득세 계산을 위한 MCP 서버입니다. 복잡한 한국 세법을 정확히 적용하여 양도소득세를 계산하고, 세율, 공제, 비과세 요건 등을 상세히 설명해드립니다.
 
 [![Test Status](https://img.shields.io/badge/tests-passing-green)]()
+![Coverage](./badges/coverage.svg)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)]()
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-0.5-purple)]()
 
