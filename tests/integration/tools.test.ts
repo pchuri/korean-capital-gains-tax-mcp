@@ -50,7 +50,23 @@ describe('MCP Tools Integration', () => {
       
       expect(result.summary.최종세액).toMatch(/\d+원$/);
       expect(result.summary.양도차익).toMatch(/\d+원$/);
-      expect(result.details.계산단계).toHaveLength(5);
+
+      const stepNames = result.details.계산단계.map((s) => s.단계);
+      // 핵심 단계 포함 여부 확인
+      expect(stepNames).toEqual(
+        expect.arrayContaining([
+          '양도차익 계산',
+          '장기보유특별공제',
+          '양도소득과세표준',
+          '산출세액',
+        ])
+      );
+      // 비과세 관련 단계(둘 중 하나)는 반드시 존재해야 함
+      expect(
+        stepNames.some(
+          (n) => n === '1세대 1주택 비례과세' || n === '1세대 1주택 완전 비과세'
+        )
+      ).toBe(true);
     });
 
     test('should handle multiple house surcharge', async () => {
