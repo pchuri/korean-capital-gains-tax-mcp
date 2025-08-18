@@ -13,6 +13,8 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   Tool,
+  type CallToolRequest,
+  type CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { calculateCapitalGainsTax } from './tools/calculate-tax.js';
@@ -294,8 +296,10 @@ class CapitalGainsTaxServer {
     // Handle tool calls
     this.server.setRequestHandler(
       CallToolRequestSchema,
-      async (request: any) => {
-        const { name, arguments: args } = request.params;
+      async (request: CallToolRequest): Promise<CallToolResult> => {
+        const { name, arguments: args } =
+          request.params ??
+          ({ name: '', arguments: {} } as CallToolRequest['params']);
 
         try {
           switch (name) {
@@ -305,7 +309,9 @@ class CapitalGainsTaxServer {
                   {
                     type: 'text',
                     text: JSON.stringify(
-                      await calculateCapitalGainsTax(args as any),
+                      await calculateCapitalGainsTax(
+                        args as unknown as import('./tools/calculate-tax.js').CalculateTaxParams
+                      ),
                       null,
                       2
                     ),
@@ -319,7 +325,9 @@ class CapitalGainsTaxServer {
                   {
                     type: 'text',
                     text: JSON.stringify(
-                      await validatePropertyInfo(args as any),
+                      await validatePropertyInfo(
+                        args as unknown as import('./tools/validate-property.js').ValidatePropertyParams
+                      ),
                       null,
                       2
                     ),
@@ -333,7 +341,9 @@ class CapitalGainsTaxServer {
                   {
                     type: 'text',
                     text: JSON.stringify(
-                      await explainCalculation(args as any),
+                      await explainCalculation(
+                        args as unknown as import('./tools/explain-calculation.js').ExplainCalculationParams
+                      ),
                       null,
                       2
                     ),
@@ -370,8 +380,9 @@ class CapitalGainsTaxServer {
   }
 
   private setupErrorHandling(): void {
-    this.server.onerror = (error: unknown) => {
-      console.error('[MCP Error]', error);
+    this.server.onerror = (error: unknown): void => {
+      const msg = `[MCP Error] ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`;
+      process.stderr.write(msg);
     };
   }
 
@@ -380,7 +391,7 @@ class CapitalGainsTaxServer {
     await this.server.connect(transport);
 
     // Keep the process running
-    process.on('SIGINT', async () => {
+    process.on('SIGINT', async (): Promise<void> => {
       await this.server.close();
       process.exit(0);
     });
@@ -400,8 +411,9 @@ export default main;
 
 // Start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(error => {
-    console.error('Failed to start server:', error);
+  main().catch((error: unknown): void => {
+    const msg = `Failed to start server: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`;
+    process.stderr.write(msg);
     process.exit(1);
   });
 }

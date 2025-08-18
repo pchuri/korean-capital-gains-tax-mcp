@@ -7,6 +7,7 @@ import {
   TransactionInfo,
   OwnerInfo,
   CalculationOptions,
+  CapitalGainsCalculation,
 } from '../types/index.js';
 import { BaseCalculator } from '../calculators/base-calculator.js';
 
@@ -24,7 +25,18 @@ export interface CalculateTaxParams {
 /**
  * 한국 부동산 양도소득세 계산
  */
-export async function calculateCapitalGainsTax(params: CalculateTaxParams) {
+export interface CalculateTaxOutput {
+  summary: Record<string, string>;
+  details: {
+    계산단계: Array<{ 단계: string; 공식: string; 금액: string; 설명: string }>;
+    적용된감면: Array<{ 유형: string; 금액: string; 근거: string }>;
+  };
+  rawData: CapitalGainsCalculation;
+}
+
+export async function calculateCapitalGainsTax(
+  params: CalculateTaxParams
+): Promise<CalculateTaxOutput> {
   const calculator = new BaseCalculator();
 
   const result = calculator.calculateCapitalGainsTax(
@@ -34,11 +46,11 @@ export async function calculateCapitalGainsTax(params: CalculateTaxParams) {
     params.options
   );
 
-  if (!result.success) {
+  if (!result.success || !result.data) {
     throw new Error(`계산 실패: ${result.error?.message}`);
   }
 
-  const calculation = result.data!;
+  const calculation: CapitalGainsCalculation = result.data;
 
   // 결과를 사용자 친화적인 형태로 변환
   return {

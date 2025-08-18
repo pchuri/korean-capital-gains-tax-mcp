@@ -24,7 +24,9 @@ export interface ValidatePropertyParams {
 /**
  * 입력된 부동산 정보의 유효성 검증
  */
-export async function validatePropertyInfo(params: ValidatePropertyParams) {
+export async function validatePropertyInfo(
+  params: ValidatePropertyParams
+): Promise<Record<string, unknown>> {
   const validation = validateAllInputs(
     params.property,
     params.transaction,

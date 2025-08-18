@@ -25,7 +25,9 @@ export interface ExplainCalculationParams {
 /**
  * 양도소득세 계산 과정 상세 설명
  */
-export async function explainCalculation(params: ExplainCalculationParams) {
+export async function explainCalculation(
+  params: ExplainCalculationParams
+): Promise<Record<string, unknown>> {
   const { property, transaction, owner } = params;
 
   // 기본 계산 정보

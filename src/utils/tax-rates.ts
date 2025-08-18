@@ -42,8 +42,9 @@ export function getMarginalTaxRate(taxableIncome: number): number {
     }
   }
 
-  // 최고 구간
-  return BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1]!.rate;
+  // 최고 구간 (배열이 비어있는 경우 0 반환)
+  const last = BASIC_TAX_RATES[BASIC_TAX_RATES.length - 1];
+  return last ? last.rate : 0;
 }
 
 /**
@@ -66,7 +67,8 @@ export function getLongTermDeductionRate(
 
   // 11년 이상인 경우 최고 구간 적용
   const highestRate =
-    LONG_TERM_DEDUCTION_RATES[LONG_TERM_DEDUCTION_RATES.length - 1]!;
+    LONG_TERM_DEDUCTION_RATES[LONG_TERM_DEDUCTION_RATES.length - 1];
+  if (!highestRate) return 0;
   return isOneHouseWithResidence && highestRate.residenceRate
     ? highestRate.residenceRate
     : highestRate.generalRate;

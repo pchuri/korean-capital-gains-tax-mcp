@@ -118,7 +118,9 @@ export function isTransferredWithinPeriod(
  * 현재 날짜 반환 (YYYY-MM-DD)
  */
 export function getCurrentDate(): string {
-  return new Date().toISOString().split('T')[0]!;
+  const iso = new Date().toISOString();
+  const parts = iso.split('T');
+  return parts[0] ?? iso;
 }
 
 /**
@@ -127,5 +129,7 @@ export function getCurrentDate(): string {
 export function addYearsToDate(dateString: string, years: number): string {
   const date = new Date(dateString);
   date.setFullYear(date.getFullYear() + years);
-  return date.toISOString().split('T')[0]!;
+  const iso = date.toISOString();
+  const parts = iso.split('T');
+  return parts[0] ?? iso;
 }
