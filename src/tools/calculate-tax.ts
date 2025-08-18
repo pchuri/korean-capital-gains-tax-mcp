@@ -29,8 +29,18 @@ export interface CalculateTaxParams {
 export interface CalculateTaxOutput {
   summary: Record<string, string>;
   details: {
-    계산단계: Array<{ id: StepId; 단계: string; 공식: string; 금액: string; 설명: string }>;
-    적용된감면: Array<{ 유형: string; 금액: string; 근거: string }>;
+    계산단계: Array<{
+      id: StepId;
+      단계: string;
+      공식: string;
+      금액: string;
+      설명: string;
+    }>;
+    적용된감면: Array<{
+      유형: string;
+      금액: string;
+      근거: string;
+    }>;
   };
   rawData: CapitalGainsCalculation;
 }

@@ -105,7 +105,7 @@ export async function explainCalculation(
         '3단계: 양도소득과세표준 = 양도소득금액 - 기본공제(250만원)',
         '4단계: 산출세액 = 과세표준 × 세율',
       ],
-      단계: overviewStepIds.map((id) => ({ id, 라벨: STEP_LABELS[id] })),
+      단계: overviewStepIds.map(id => ({ id, 라벨: STEP_LABELS[id] })),
     },
 
     기본정보: {
