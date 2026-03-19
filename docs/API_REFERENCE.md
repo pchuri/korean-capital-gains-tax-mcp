@@ -47,7 +47,7 @@
 
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
-| householdType | string | ✓ | 세대 구성 (`1household1house`, `multiple`, `temporary2house`) |
+| householdType | string | ✓ | 세대 구성 (`1household1house`, `2houses`, `3plus_houses`, `temporary2house`). `multiple`도 하위호환으로 허용되나 deprecated |
 | residencePeriod.start | string | | 거주 시작일 (YYYY-MM-DD) |
 | residencePeriod.end | string | | 거주 종료일 (YYYY-MM-DD) |
 | isLongTermRental | boolean | | 장기임대주택 여부 |

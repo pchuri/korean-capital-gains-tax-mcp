@@ -32,6 +32,7 @@ import {
   calculateHighValueHouseTaxableGains,
 } from '../utils/tax-rates.js';
 import { validateAllInputs } from '../utils/validators.js';
+import { getHouseCount, normalizeHouseholdType } from '../utils/house-count.js';
 
 export class BaseCalculator {
   /**
@@ -44,8 +45,13 @@ export class BaseCalculator {
     options?: CalculationOptions
   ): CalculationResult<CapitalGainsCalculation> {
     try {
+      const normalizedOwner: OwnerInfo = {
+        ...owner,
+        householdType: normalizeHouseholdType(owner.householdType),
+      };
+
       // 입력 데이터 검증
-      const validation = validateAllInputs(property, transaction, owner, options);
+      const validation = validateAllInputs(property, transaction, normalizedOwner, options);
       if (!validation.isValid) {
         return {
           success: false,
@@ -57,7 +63,7 @@ export class BaseCalculator {
       }
 
       // 계산 수행
-      const calculation = this.performCalculation(property, transaction, owner, options);
+      const calculation = this.performCalculation(property, transaction, normalizedOwner, options);
 
       return {
         success: true,
@@ -299,19 +305,7 @@ export class BaseCalculator {
     return calculateResidencePeriodYears(owner.residencePeriod.start, endDate);
   }
 
-  /**
-   * 보유 주택 수 계산
-   */
   protected getHouseCount(owner: OwnerInfo): number {
-    switch (owner.householdType) {
-      case '1household1house':
-        return 1;
-      case 'temporary2house':
-        return 2;
-      case 'multiple':
-        return 3; // 임시로 3주택으로 가정
-      default:
-        return 1;
-    }
+    return getHouseCount(owner.householdType);
   }
 }

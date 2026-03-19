@@ -139,8 +139,8 @@ const TOOLS: Tool[] = [
           properties: {
             householdType: {
               type: 'string',
-              enum: ['1household1house', 'multiple', 'temporary2house'],
-              description: '세대 구성 유형 (1household1house: 1세대1주택, multiple: 다주택, temporary2house: 일시적2주택)',
+              enum: ['1household1house', '2houses', '3plus_houses', 'temporary2house', 'multiple'],
+              description: '세대 구성 유형 (1household1house: 1세대1주택, 2houses: 2주택, 3plus_houses: 3주택 이상, temporary2house: 일시적2주택, multiple: deprecated → 3plus_houses로 자동 변환)',
             },
             residencePeriod: {
               type: 'object',
@@ -278,13 +278,15 @@ class CapitalGainsTaxServer {
       const { name, arguments: args } = request.params;
 
       try {
+        const normalizedArgs = this.normalizeArgs(args);
+
         switch (name) {
           case 'calculate_capital_gains_tax':
             return {
               content: [
                 {
                   type: 'text',
-                  text: JSON.stringify(await calculateCapitalGainsTax(args as any), null, 2),
+                  text: JSON.stringify(await calculateCapitalGainsTax(normalizedArgs as any), null, 2),
                 },
               ],
             };
@@ -294,7 +296,7 @@ class CapitalGainsTaxServer {
               content: [
                 {
                   type: 'text',
-                  text: JSON.stringify(await validatePropertyInfo(args as any), null, 2),
+                  text: JSON.stringify(await validatePropertyInfo(normalizedArgs as any), null, 2),
                 },
               ],
             };
@@ -304,7 +306,7 @@ class CapitalGainsTaxServer {
               content: [
                 {
                   type: 'text',
-                  text: JSON.stringify(await explainCalculation(args as any), null, 2),
+                  text: JSON.stringify(await explainCalculation(normalizedArgs as any), null, 2),
                 },
               ],
             };
@@ -329,6 +331,15 @@ class CapitalGainsTaxServer {
         };
       }
     });
+  }
+
+  /** Normalize deprecated 'multiple' householdType to '3plus_houses'. */
+  private normalizeArgs(args: Record<string, unknown>): Record<string, unknown> {
+    const owner = args?.owner as Record<string, unknown> | undefined;
+    if (owner?.householdType === 'multiple') {
+      return { ...args, owner: { ...owner, householdType: '3plus_houses' } };
+    }
+    return args;
   }
 
   private setupErrorHandling(): void {

@@ -170,7 +170,7 @@ describe('1세대 1주택 디버깅 테스트', () => {
     };
 
     const owner: OwnerInfo = {
-      householdType: 'multiple', // 다주택자
+      householdType: '3plus_houses', // 다주택자 (3주택 이상)
     };
 
     console.log('📋 입력 데이터:');
