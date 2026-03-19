@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "Model Context Protocol server for calculating Korean capital gains tax on real estate transactions",
   "main": "dist/server.js",
+  "bin": {
+    "korean-capital-gains-tax-mcp": "dist/server.js"
+  },
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "dev": "tsx src/server.ts",
     "start": "node scripts/start.mjs",
     "test": "jest",
