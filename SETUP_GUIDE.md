@@ -8,6 +8,27 @@
 - **Claude Desktop** 애플리케이션 설치
 - **터미널** 또는 **명령 프롬프트** 접근
 
+## ⚡ 빠른 설정 (npx 권장)
+
+별도 빌드 없이 npx로 바로 사용할 수 있습니다:
+
+```json
+{
+  "mcpServers": {
+    "korean-capital-gains-tax": {
+      "command": "npx",
+      "args": ["--yes", "git+https://github.com/pchuri/korean-capital-gains-tax-mcp"]
+    }
+  }
+}
+```
+
+설정 후 Claude Desktop을 재시작하면 바로 사용 가능합니다.
+
+---
+
+아래는 로컬에 직접 설치하는 방법입니다 (개발/기여 목적).
+
 ## 🔧 1단계: 프로젝트 빌드
 
 먼저 MCP 서버를 빌드합니다:
@@ -25,7 +46,7 @@ npm run build
 npm test
 ```
 
-## ⚙️ 2단계: Claude Desktop 설정
+## ⚙️ 2단계: Claude Desktop 설정 (로컬 설치)
 
 ### macOS/Linux 설정
 
