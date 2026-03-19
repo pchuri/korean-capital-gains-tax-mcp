@@ -7,6 +7,8 @@
  * on real estate transactions.
  */
 
+import { realpathSync } from 'fs';
+import { pathToFileURL } from 'url';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -368,7 +370,16 @@ async function main(): Promise<void> {
   await server.run();
 }
 
-main().catch((error) => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-});
+export default main;
+
+const entryPath = process.argv[1];
+const isDirectRun =
+  entryPath != null &&
+  import.meta.url === pathToFileURL(realpathSync(entryPath)).href;
+
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  });
+}
