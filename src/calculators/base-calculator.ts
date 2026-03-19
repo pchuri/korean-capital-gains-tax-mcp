@@ -26,6 +26,8 @@ import {
 import {
   getLongTermDeductionRate,
   getFinalTaxRate,
+  getShortTermHeavyTaxRate,
+  getMultipleHouseSurcharge,
   calculateProgressiveTaxRate,
   calculateHighValueHouseTaxableGains,
 } from '../utils/tax-rates.js';
@@ -186,6 +188,9 @@ export class BaseCalculator {
 
     // 7. 세율 적용 및 세액 계산
     const houseCount = this.getHouseCount(owner);
+    const isHeavyTax =
+      getShortTermHeavyTaxRate(holdingYears) !== null ||
+      getMultipleHouseSurcharge(houseCount, property.location.isAdjustmentTargetArea) > 0;
     const applicableTaxRate = getFinalTaxRate(
       taxableIncome,
       holdingYears,
@@ -194,12 +199,12 @@ export class BaseCalculator {
     );
 
     let calculatedTax = 0;
-    if (applicableTaxRate >= 40) {
+    if (isHeavyTax) {
       // 중과세 (정액세율)
       calculatedTax = Math.floor(taxableIncome * (applicableTaxRate / 100));
     } else {
       // 일반세율 (누진세)
-      calculatedTax = calculateProgressiveTaxRate(taxableIncome);
+      calculatedTax = Math.floor(calculateProgressiveTaxRate(taxableIncome));
     }
 
     steps.push({

@@ -50,7 +50,7 @@ describe('MCP Tools Integration', () => {
       
       expect(result.summary.최종세액).toMatch(/\d+원$/);
       expect(result.summary.양도차익).toMatch(/\d+원$/);
-      expect(result.details.계산단계).toHaveLength(5);
+      expect(result.details.계산단계).toHaveLength(6); // 고가주택 비례과세 단계 포함
     });
 
     test('should handle multiple house surcharge', async () => {
