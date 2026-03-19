@@ -88,7 +88,7 @@ describe('BaseCalculator', () => {
   });
 
   test('should apply progressive tax for high-income non-heavy-tax case', () => {
-    // taxableIncome이 42% 구간(5억~10억)에 해당하는 케이스
+    // taxableIncome이 45% 구간(10억 초과)에 해당하는 케이스
     // 버그 재현: 이전 코드는 applicableTaxRate >= 40이면 정액세율 적용
     const highValueProperty: PropertyInfo = {
       type: 'apartment',

@@ -209,9 +209,11 @@ export class BaseCalculator {
 
     steps.push({
       stepName: '산출세액',
-      formula: `과세표준 × ${applicableTaxRate}%`,
+      formula: isHeavyTax
+        ? `과세표준 × ${applicableTaxRate}%`
+        : `누진세율 적용 (최고세율 ${applicableTaxRate}%)`,
       amount: calculatedTax,
-      description: `${applicableTaxRate >= 40 ? '중과세율' : '기본세율'} 적용`,
+      description: isHeavyTax ? '중과세율 적용' : '기본세율(누진) 적용',
     });
 
     // 8. 최종 세액 (추가 감면 적용 가능)
