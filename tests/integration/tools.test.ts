@@ -72,9 +72,14 @@ describe('MCP Tools Integration', () => {
         householdType: '2houses',
       };
 
+      const postExemptionTransaction: TransactionInfo = {
+        ...validTransaction,
+        transferDate: '2026-06-01',
+      };
+
       const result = await calculateCapitalGainsTax({
         property: validProperty,
-        transaction: validTransaction,
+        transaction: postExemptionTransaction,
         owner: twoHouseOwner,
       });
 
@@ -82,7 +87,7 @@ describe('MCP Tools Integration', () => {
       // 2주택 중과세율은 3주택 이상보다 낮아야 함
       const threeHouseResult = await calculateCapitalGainsTax({
         property: validProperty,
-        transaction: validTransaction,
+        transaction: postExemptionTransaction,
         owner: { householdType: '3plus_houses' },
       });
       const twoRate = parseInt(result.summary.적용세율);
