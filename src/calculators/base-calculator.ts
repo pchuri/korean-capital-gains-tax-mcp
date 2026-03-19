@@ -32,7 +32,7 @@ import {
   calculateHighValueHouseTaxableGains,
 } from '../utils/tax-rates.js';
 import { validateAllInputs } from '../utils/validators.js';
-import { getHouseCount } from '../utils/house-count.js';
+import { getHouseCount, normalizeHouseholdType } from '../utils/house-count.js';
 
 export class BaseCalculator {
   /**
@@ -45,8 +45,13 @@ export class BaseCalculator {
     options?: CalculationOptions
   ): CalculationResult<CapitalGainsCalculation> {
     try {
+      const normalizedOwner: OwnerInfo = {
+        ...owner,
+        householdType: normalizeHouseholdType(owner.householdType),
+      };
+
       // 입력 데이터 검증
-      const validation = validateAllInputs(property, transaction, owner, options);
+      const validation = validateAllInputs(property, transaction, normalizedOwner, options);
       if (!validation.isValid) {
         return {
           success: false,
@@ -58,7 +63,7 @@ export class BaseCalculator {
       }
 
       // 계산 수행
-      const calculation = this.performCalculation(property, transaction, owner, options);
+      const calculation = this.performCalculation(property, transaction, normalizedOwner, options);
 
       return {
         success: true,

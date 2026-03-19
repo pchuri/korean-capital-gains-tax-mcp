@@ -332,7 +332,7 @@
     }
   },
   "owner": {
-    "householdType": "multiple",
+    "householdType": "3plus_houses",
     "isLongTermRental": true,
     "rentalPeriod": 8
   }
@@ -367,7 +367,7 @@
     }
   },
   "owner": {
-    "householdType": "multiple"
+    "householdType": "3plus_houses"
   }
 }
 ```
