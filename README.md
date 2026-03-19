@@ -217,9 +217,9 @@ npm run typecheck
 
 ## 📋 요구사항
 
-- Node.js 18.0.0 이상
+- Node.js 18.14.1 이상
 - TypeScript 5.2 이상
-- MCP SDK 0.5 이상
+- MCP SDK 1.27 이상
 
 ## 📄 라이선스
 
