@@ -139,8 +139,8 @@ const TOOLS: Tool[] = [
           properties: {
             householdType: {
               type: 'string',
-              enum: ['1household1house', 'multiple', 'temporary2house'],
-              description: '세대 구성 유형 (1household1house: 1세대1주택, multiple: 다주택, temporary2house: 일시적2주택)',
+              enum: ['1household1house', '2houses', '3plus_houses', 'temporary2house'],
+              description: '세대 구성 유형 (1household1house: 1세대1주택, 2houses: 2주택, 3plus_houses: 3주택 이상, temporary2house: 일시적2주택)',
             },
             residencePeriod: {
               type: 'object',

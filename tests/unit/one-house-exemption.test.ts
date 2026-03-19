@@ -138,7 +138,7 @@ describe('1세대 1주택 비과세 테스트', () => {
       };
 
       const owner: OwnerInfo = {
-        householdType: 'multiple', // 다주택자
+        householdType: '3plus_houses', // 다주택자 (3주택 이상)
       };
 
       const result = calculator.calculateCapitalGainsTax(property, transaction, owner);

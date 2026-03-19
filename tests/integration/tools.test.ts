@@ -55,7 +55,7 @@ describe('MCP Tools Integration', () => {
 
     test('should handle multiple house surcharge', async () => {
       const multipleHouseOwner: OwnerInfo = {
-        householdType: 'multiple',
+        householdType: '3plus_houses',
       };
 
       const result = await calculateCapitalGainsTax({

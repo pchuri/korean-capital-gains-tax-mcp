@@ -38,8 +38,8 @@ export async function explainCalculation(params: ExplainCalculationParams) {
   const hasResidenceRequirement = owner.householdType === '1household1house' && residenceYears >= 2;
   const longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
 
-  const houseCount = owner.householdType === '1household1house' ? 1 : 
-                    owner.householdType === 'temporary2house' ? 2 : 3;
+  const houseCount = owner.householdType === '1household1house' ? 1 :
+                    (owner.householdType === 'temporary2house' || owner.householdType === '2houses') ? 2 : 3;
 
   const applicableTaxRate = getFinalTaxRate(
     1000000, // 임시값
@@ -66,7 +66,8 @@ export async function explainCalculation(params: ExplainCalculationParams) {
       조정대상지역: property.location.isAdjustmentTargetArea ? '예' : '아니오',
       보유기간: `${holdingYears}년`,
       세대구성: owner.householdType === '1household1house' ? '1세대 1주택' :
-               owner.householdType === 'temporary2house' ? '일시적 2주택' : '다주택',
+               owner.householdType === 'temporary2house' ? '일시적 2주택' :
+               owner.householdType === '2houses' ? '2주택' : '3주택 이상',
       거주기간: owner.residencePeriod ? `${residenceYears.toFixed(1)}년` : '해당없음',
     },
 

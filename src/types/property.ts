@@ -55,7 +55,7 @@ export interface TransactionInfo {
   necessaryExpenses: NecessaryExpenses;
 }
 
-export type HouseholdType = '1household1house' | 'multiple' | 'temporary2house';
+export type HouseholdType = '1household1house' | '2houses' | '3plus_houses' | 'temporary2house';
 
 export interface ResidencePeriod {
   /** 거주 시작일 (ISO 8601 format: YYYY-MM-DD) */

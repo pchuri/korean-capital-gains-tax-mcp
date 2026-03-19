@@ -72,7 +72,7 @@ describe('BaseCalculator', () => {
 
   test('should calculate multiple house surcharge', () => {
     const multipleHouseOwner: OwnerInfo = {
-      householdType: 'multiple',
+      householdType: '3plus_houses',
     };
 
     const result = calculator.calculateCapitalGainsTax(
@@ -84,6 +84,35 @@ describe('BaseCalculator', () => {
     expect(result.success).toBe(true);
     if (result.data) {
       expect(result.data.applicableTaxRate).toBeGreaterThan(45); // 중과세 적용
+    }
+  });
+
+  test('should apply lower surcharge for 2-house owner in adjustment area', () => {
+    const twoHouseOwner: OwnerInfo = {
+      householdType: '2houses',
+    };
+
+    const adjustmentProperty: PropertyInfo = {
+      ...sampleProperty,
+      location: { ...sampleProperty.location, isAdjustmentTargetArea: true },
+    };
+
+    const result = calculator.calculateCapitalGainsTax(
+      adjustmentProperty,
+      sampleTransaction,
+      twoHouseOwner
+    );
+
+    expect(result.success).toBe(true);
+    if (result.data) {
+      // 2주택 조정대상지역: 기본세율 + 20% 가산
+      const threeHouseResult = calculator.calculateCapitalGainsTax(
+        adjustmentProperty,
+        sampleTransaction,
+        { householdType: '3plus_houses' }
+      );
+      // 2주택 세율 < 3주택 이상 세율
+      expect(result.data.applicableTaxRate).toBeLessThan(threeHouseResult.data!.applicableTaxRate);
     }
   });
 

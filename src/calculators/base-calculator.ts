@@ -307,9 +307,10 @@ export class BaseCalculator {
       case '1household1house':
         return 1;
       case 'temporary2house':
+      case '2houses':
         return 2;
-      case 'multiple':
-        return 3; // 임시로 3주택으로 가정
+      case '3plus_houses':
+        return 3;
       default:
         return 1;
     }
