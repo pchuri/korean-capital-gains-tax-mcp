@@ -86,4 +86,46 @@ describe('BaseCalculator', () => {
       expect(result.data.applicableTaxRate).toBeGreaterThan(45); // 중과세 적용
     }
   });
+
+  test('should apply progressive tax for high-income non-heavy-tax case', () => {
+    // taxableIncome이 45% 구간(10억 초과)에 해당하는 케이스
+    // 버그 재현: 이전 코드는 applicableTaxRate >= 40이면 정액세율 적용
+    const highValueProperty: PropertyInfo = {
+      type: 'apartment',
+      acquisitionPrice: 1_000_000_000,
+      acquisitionDate: '2010-01-01',
+      location: {
+        city: '서울특별시',
+        district: '서초구',
+        isAdjustmentTargetArea: false, // 조정대상지역 아님 → 다주택 중과세 없음
+      },
+      area: { totalArea: 200, exclusiveArea: 165 },
+    };
+
+    const highValueTransaction: TransactionInfo = {
+      transferPrice: 5_000_000_000,
+      transferDate: '2024-01-01',
+      necessaryExpenses: {},
+    };
+
+    const oneHouseOwner: OwnerInfo = {
+      householdType: '1household1house',
+      residencePeriod: { start: '2010-01-01', end: '2024-01-01' },
+    };
+
+    const result = calculator.calculateCapitalGainsTax(
+      highValueProperty,
+      highValueTransaction,
+      oneHouseOwner
+    );
+
+    expect(result.success).toBe(true);
+    if (result.data) {
+      // taxableIncome ≈ 1,456,700,000 → marginalRate 45%
+      // 정액세율(버그): floor(1,456,700,000 × 45%) = 655,515,000
+      // 누진세율(정상): 589,575,000
+      expect(result.data.applicableTaxRate).toBe(45);
+      expect(result.data.calculatedTax).toBe(589_575_000);
+    }
+  });
 });
