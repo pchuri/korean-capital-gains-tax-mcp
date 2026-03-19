@@ -17,7 +17,7 @@
   "mcpServers": {
     "korean-capital-gains-tax": {
       "command": "npx",
-      "args": ["--yes", "git+https://github.com/pchuri/korean-capital-gains-tax-mcp#v1.0.0"]
+      "args": ["--yes", "git+https://github.com/pchuri/korean-capital-gains-tax-mcp"]
     }
   }
 }
