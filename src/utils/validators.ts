@@ -189,7 +189,7 @@ export function validateOwnerInfo(owner: OwnerInfo): ValidationResult {
   const errors: Array<{ field: string; message: string; code: string }> = [];
 
   // 세대 유형 검사
-  const validHouseholdTypes = ['1household1house', '2houses', '3plus_houses', 'temporary2house'];
+  const validHouseholdTypes = ['1household1house', '2houses', '3plus_houses', 'temporary2house', 'multiple'];
   if (!validHouseholdTypes.includes(owner.householdType)) {
     errors.push({
       field: 'owner.householdType',

@@ -67,6 +67,29 @@ describe('MCP Tools Integration', () => {
       expect(result.summary.적용세율).toMatch(/[4-7]\d%/); // 중과세율 적용
     });
 
+    test('should handle 2-house owner calculation', async () => {
+      const twoHouseOwner: OwnerInfo = {
+        householdType: '2houses',
+      };
+
+      const result = await calculateCapitalGainsTax({
+        property: validProperty,
+        transaction: validTransaction,
+        owner: twoHouseOwner,
+      });
+
+      expect(result.summary.적용세율).toMatch(/\d+%/);
+      // 2주택 중과세율은 3주택 이상보다 낮아야 함
+      const threeHouseResult = await calculateCapitalGainsTax({
+        property: validProperty,
+        transaction: validTransaction,
+        owner: { householdType: '3plus_houses' },
+      });
+      const twoRate = parseInt(result.summary.적용세율);
+      const threeRate = parseInt(threeHouseResult.summary.적용세율);
+      expect(twoRate).toBeLessThan(threeRate);
+    });
+
     test('should throw error for invalid data', async () => {
       const invalidProperty = { ...validProperty, acquisitionPrice: -1000 };
 

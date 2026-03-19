@@ -112,8 +112,11 @@ describe('BaseCalculator', () => {
         { householdType: '3plus_houses' }
       );
       expect(threeHouseResult.success).toBe(true);
+      expect(threeHouseResult.data).toBeDefined();
       // 2주택 세율 < 3주택 이상 세율
-      expect(result.data.applicableTaxRate).toBeLessThan(threeHouseResult.data!.applicableTaxRate);
+      if (threeHouseResult.data) {
+        expect(result.data.applicableTaxRate).toBeLessThan(threeHouseResult.data.applicableTaxRate);
+      }
     }
   });
 

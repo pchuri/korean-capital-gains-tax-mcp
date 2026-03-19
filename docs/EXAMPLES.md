@@ -94,7 +94,7 @@
       }
     },
     "owner": {
-      "householdType": "multiple"
+      "householdType": "3plus_houses"
     }
   }
 }
