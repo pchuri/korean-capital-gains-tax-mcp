@@ -32,6 +32,7 @@ import {
   calculateHighValueHouseTaxableGains,
 } from '../utils/tax-rates.js';
 import { validateAllInputs } from '../utils/validators.js';
+import { getHouseCount } from '../utils/house-count.js';
 
 export class BaseCalculator {
   /**
@@ -299,20 +300,7 @@ export class BaseCalculator {
     return calculateResidencePeriodYears(owner.residencePeriod.start, endDate);
   }
 
-  /**
-   * 보유 주택 수 계산
-   */
   protected getHouseCount(owner: OwnerInfo): number {
-    switch (owner.householdType) {
-      case '1household1house':
-        return 1;
-      case 'temporary2house':
-      case '2houses':
-        return 2;
-      case '3plus_houses':
-        return 3;
-      default:
-        return 1;
-    }
+    return getHouseCount(owner.householdType);
   }
 }

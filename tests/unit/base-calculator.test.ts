@@ -111,6 +111,7 @@ describe('BaseCalculator', () => {
         sampleTransaction,
         { householdType: '3plus_houses' }
       );
+      expect(threeHouseResult.success).toBe(true);
       // 2주택 세율 < 3주택 이상 세율
       expect(result.data.applicableTaxRate).toBeLessThan(threeHouseResult.data!.applicableTaxRate);
     }
