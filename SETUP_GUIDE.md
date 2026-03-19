@@ -74,7 +74,7 @@ notepad %APPDATA%/Claude/claude_desktop_config.json
   "mcpServers": {
     "korean-capital-gains-tax": {
       "command": "node",
-      "args": ["/Users/user/dev/korean-capital-gains-tax-mcp/mcp-server.js"],
+      "args": ["/Users/user/dev/korean-capital-gains-tax-mcp/dist/server.js"],
       "env": {
         "NODE_ENV": "production",
         "NPM_CONFIG_LOGLEVEL": "silent"
@@ -174,8 +174,6 @@ MCP 서버가 연결되었는지 확인해주세요.
 1세대 1주택 양도소득세 계산 과정을 자세히 설명해주세요.
 보유기간 5년, 거주기간 3년인 경우의 세율과 공제율을 알려주세요.
 ```
-
-## 🔧 문제 해결
 
 ## 🔧 문제 해결
 

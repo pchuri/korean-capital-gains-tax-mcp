@@ -59,8 +59,7 @@ notepad %APPDATA%/Claude/claude_desktop_config.json
 ```bash
 git clone https://github.com/pchuri/korean-capital-gains-tax-mcp.git
 cd korean-capital-gains-tax-mcp
-npm install
-npm run build
+npm install  # prepare 스크립트가 자동으로 빌드합니다
 npm start
 ```
 
@@ -145,7 +144,7 @@ npm start
 - [📖 API 참조](docs/API_REFERENCE.md) - 상세한 API 문서
 - [🏗️ 사용 예제](docs/EXAMPLES.md) - 다양한 사용 사례
 - [⚖️ 양도소득세 가이드](docs/CAPITAL_GAINS_TAX_GUIDE.md) - 한국 양도소득세 법령 설명
-- [🛠️ 개발 가이드라인](docs/CODING_GUIDELINES.md) - 개발자를 위한 가이드라인
+- [🛠️ 개발 가이드라인](.github/instructions/coding_guidelines.md.instructions.md) - 개발자를 위한 가이드라인
 
 ## 🏗️ 아키텍처
 
