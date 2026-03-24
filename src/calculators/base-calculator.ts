@@ -160,21 +160,42 @@ export class BaseCalculator {
       }
     }
 
-    // 4. 장기보유특별공제 계산
+    // 4. 중과세 여부 사전 판단 (장기보유특별공제 적용 여부 결정에 필요)
+    const houseCount = this.getHouseCount(owner);
+    const multipleHouseSurcharge = getMultipleHouseSurcharge(
+      houseCount,
+      property.location.isAdjustmentTargetArea,
+      transaction.transferDate
+    );
+    const isMultipleHouseHeavyTax = multipleHouseSurcharge > 0;
+
+    // 5. 장기보유특별공제 계산 (다주택 중과세 적용 시 공제 배제)
     const residenceYears = this.calculateResidenceYears(owner, transaction.transferDate);
     const hasResidenceRequirement = owner.householdType === '1household1house' && residenceYears >= 2;
-    
-    const longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
-    const longTermDeduction = Math.floor(taxableCapitalGains * (longTermDeductionRate / 100));
 
-    steps.push({
-      stepName: '장기보유특별공제',
-      formula: `과세대상 양도차익 × ${longTermDeductionRate}%`,
-      amount: longTermDeduction,
-      description: `보유기간 ${holdingYears}년${hasResidenceRequirement ? ' (거주)' : ''} 적용`,
-    });
+    let longTermDeductionRate = 0;
+    let longTermDeduction = 0;
 
-    // 5. 양도소득금액 계산
+    if (isMultipleHouseHeavyTax) {
+      steps.push({
+        stepName: '장기보유특별공제',
+        formula: '다주택 중과세 적용으로 공제 배제',
+        amount: 0,
+        description: '조정대상지역 다주택자 중과세 적용 시 장기보유특별공제 미적용',
+      });
+    } else {
+      longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
+      longTermDeduction = Math.floor(taxableCapitalGains * (longTermDeductionRate / 100));
+
+      steps.push({
+        stepName: '장기보유특별공제',
+        formula: `과세대상 양도차익 × ${longTermDeductionRate}%`,
+        amount: longTermDeduction,
+        description: `보유기간 ${holdingYears}년${hasResidenceRequirement ? ' (거주)' : ''} 적용`,
+      });
+    }
+
+    // 6. 양도소득금액 계산
     const taxableGains = Math.max(0, taxableCapitalGains - longTermDeduction);
     steps.push({
       stepName: '양도소득금액',
@@ -183,7 +204,7 @@ export class BaseCalculator {
       description: `${taxableCapitalGains.toLocaleString()}원 - ${longTermDeduction.toLocaleString()}원`,
     });
 
-    // 6. 양도소득과세표준 계산
+    // 7. 양도소득과세표준 계산
     const taxableIncome = Math.max(0, taxableGains - BASIC_DEDUCTION);
     steps.push({
       stepName: '양도소득과세표준',
@@ -192,16 +213,13 @@ export class BaseCalculator {
       description: `${taxableGains.toLocaleString()}원 - ${BASIC_DEDUCTION.toLocaleString()}원`,
     });
 
-    // 7. 세율 적용 및 세액 계산
-    const houseCount = this.getHouseCount(owner);
+    // 8. 세율 적용 및 세액 계산
     const isHeavyTax =
-      getShortTermHeavyTaxRate(holdingYears) !== null ||
-      getMultipleHouseSurcharge(houseCount, property.location.isAdjustmentTargetArea) > 0;
+      getShortTermHeavyTaxRate(holdingYears) !== null || isMultipleHouseHeavyTax;
     const applicableTaxRate = getFinalTaxRate(
       taxableIncome,
       holdingYears,
-      houseCount,
-      property.location.isAdjustmentTargetArea
+      multipleHouseSurcharge
     );
 
     let calculatedTax = 0;

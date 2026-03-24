@@ -50,27 +50,48 @@ describe('Tax Rates Utils', () => {
   });
 
   describe('getMultipleHouseSurcharge', () => {
-    test('should return surcharge for multiple houses in adjustment area', () => {
-      expect(getMultipleHouseSurcharge(1, true)).toBe(0); // 1주택
-      expect(getMultipleHouseSurcharge(2, true)).toBe(20); // 2주택
-      expect(getMultipleHouseSurcharge(3, true)).toBe(30); // 3주택 이상
-      expect(getMultipleHouseSurcharge(2, false)).toBe(0); // 비조정대상지역
+    test('should return surcharge for multiple houses in adjustment area after exemption period', () => {
+      expect(getMultipleHouseSurcharge(1, true, '2026-06-01')).toBe(0); // 1주택
+      expect(getMultipleHouseSurcharge(2, true, '2026-06-01')).toBe(20); // 2주택
+      expect(getMultipleHouseSurcharge(3, true, '2026-06-01')).toBe(30); // 3주택 이상
+      expect(getMultipleHouseSurcharge(2, false, '2026-06-01')).toBe(0); // 비조정대상지역
+    });
+
+    test('should return 0 surcharge during exemption period (2022-05-10 ~ 2026-05-09)', () => {
+      expect(getMultipleHouseSurcharge(2, true, '2023-01-01')).toBe(0);
+      expect(getMultipleHouseSurcharge(3, true, '2025-12-01')).toBe(0);
+      expect(getMultipleHouseSurcharge(3, true, '2026-05-09')).toBe(0); // 마지막 날
+    });
+
+    test('should apply surcharge after exemption period ends', () => {
+      expect(getMultipleHouseSurcharge(2, true, '2026-05-10')).toBe(20);
+      expect(getMultipleHouseSurcharge(3, true, '2026-05-10')).toBe(30);
+    });
+
+    test('should apply surcharge before exemption period', () => {
+      expect(getMultipleHouseSurcharge(2, true, '2022-05-09')).toBe(20);
+      expect(getMultipleHouseSurcharge(3, true, '2022-05-09')).toBe(30);
     });
   });
 
   describe('getFinalTaxRate', () => {
     test('should prioritize short-term heavy tax', () => {
-      expect(getFinalTaxRate(50_000_000, 0.5, 1, false)).toBe(50); // 단기보유 중과세
-      expect(getFinalTaxRate(50_000_000, 1.5, 1, false)).toBe(40); // 단기보유 중과세
+      expect(getFinalTaxRate(50_000_000, 0.5)).toBe(50); // 단기보유 중과세
+      expect(getFinalTaxRate(50_000_000, 1.5)).toBe(40); // 단기보유 중과세
     });
 
-    test('should apply multiple house surcharge', () => {
-      expect(getFinalTaxRate(60_000_000, 5, 2, true)).toBe(44); // 24% + 20%
-      expect(getFinalTaxRate(60_000_000, 5, 3, true)).toBe(54); // 24% + 30%
+    test('should apply pre-computed surcharge', () => {
+      expect(getFinalTaxRate(60_000_000, 5, 20)).toBe(44); // 24% + 20%
+      expect(getFinalTaxRate(60_000_000, 5, 30)).toBe(54); // 24% + 30%
+    });
+
+    test('should return basic rate when no surcharge', () => {
+      expect(getFinalTaxRate(60_000_000, 5, 0)).toBe(24);
+      expect(getFinalTaxRate(60_000_000, 5)).toBe(24);
     });
 
     test('should cap at 70%', () => {
-      expect(getFinalTaxRate(2_000_000_000, 5, 3, true)).toBe(70); // 45% + 30% -> 70% cap
+      expect(getFinalTaxRate(2_000_000_000, 5, 30)).toBe(70); // 45% + 30% -> 70% cap
     });
   });
 

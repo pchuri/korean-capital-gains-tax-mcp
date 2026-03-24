@@ -61,7 +61,7 @@ export const ADJUSTMENT_TARGET_AREA = {
   /** 다주택자 중과 한시적 배제 시작일 */
   SURCHARGE_EXEMPTION_START: '2022-05-10',
   /** 다주택자 중과 한시적 배제 종료일 */
-  SURCHARGE_EXEMPTION_END: '2025-05-09',
+  SURCHARGE_EXEMPTION_END: '2026-05-09',
 } as const;
 
 /** 임대주택 특례 관련 상수 */

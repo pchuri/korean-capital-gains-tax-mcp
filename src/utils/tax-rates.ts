@@ -2,7 +2,7 @@
  * Tax rates calculation utilities
  */
 
-import { BASIC_TAX_RATES, LONG_TERM_DEDUCTION_RATES } from './constants.js';
+import { BASIC_TAX_RATES, LONG_TERM_DEDUCTION_RATES, ADJUSTMENT_TARGET_AREA } from './constants.js';
 
 /**
  * 과세표준에 따른 세율 계산 (누진세)
@@ -85,12 +85,18 @@ export function getShortTermHeavyTaxRate(holdingYears: number): number | null {
 
 /**
  * 다주택자 중과세율 가산 계산
+ * 한시적 배제기간(2022-05-10 ~ 2026-05-09) 내 양도 시 중과 미적용
  */
 export function getMultipleHouseSurcharge(
   houseCount: number,
-  isAdjustmentTargetArea: boolean
+  isAdjustmentTargetArea: boolean,
+  transferDate: string
 ): number {
   if (!isAdjustmentTargetArea || houseCount <= 1) {
+    return 0;
+  }
+
+  if (isWithinSurchargeExemptionPeriod(transferDate)) {
     return 0;
   }
 
@@ -101,14 +107,21 @@ export function getMultipleHouseSurcharge(
   }
 }
 
+function isWithinSurchargeExemptionPeriod(transferDate: string): boolean {
+  return (
+    transferDate >= ADJUSTMENT_TARGET_AREA.SURCHARGE_EXEMPTION_START &&
+    transferDate <= ADJUSTMENT_TARGET_AREA.SURCHARGE_EXEMPTION_END
+  );
+}
+
 /**
  * 최종 적용 세율 계산 (중과세 포함)
+ * @param multipleHouseSurcharge 사전 계산된 다주택자 중과세율 가산 (getMultipleHouseSurcharge 결과)
  */
 export function getFinalTaxRate(
   taxableIncome: number,
   holdingYears: number,
-  houseCount: number = 1,
-  isAdjustmentTargetArea: boolean = false
+  multipleHouseSurcharge: number = 0
 ): number {
   // 단기보유 중과세 확인
   const shortTermRate = getShortTermHeavyTaxRate(holdingYears);
@@ -119,10 +132,7 @@ export function getFinalTaxRate(
   // 기본 세율
   const basicRate = getMarginalTaxRate(taxableIncome);
 
-  // 다주택자 중과세 가산
-  const surcharge = getMultipleHouseSurcharge(houseCount, isAdjustmentTargetArea);
-
-  return Math.min(basicRate + surcharge, 70); // 최대 70%로 제한
+  return Math.min(basicRate + multipleHouseSurcharge, 70); // 최대 70%로 제한
 }
 
 /**

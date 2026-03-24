@@ -70,20 +70,49 @@ describe('BaseCalculator', () => {
     expect(result.error).toBeDefined();
   });
 
-  test('should calculate multiple house surcharge', () => {
+  test('should calculate multiple house surcharge after exemption period', () => {
     const multipleHouseOwner: OwnerInfo = {
       householdType: '3plus_houses',
     };
 
+    const postExemptionTransaction: TransactionInfo = {
+      ...sampleTransaction,
+      transferDate: '2026-06-01',
+    };
+
     const result = calculator.calculateCapitalGainsTax(
       sampleProperty,
-      sampleTransaction,
+      postExemptionTransaction,
       multipleHouseOwner
     );
 
     expect(result.success).toBe(true);
     if (result.data) {
       expect(result.data.applicableTaxRate).toBeGreaterThan(45); // 중과세 적용
+      expect(result.data.longTermDeduction).toBe(0); // 중과세 적용 시 장기보유특별공제 배제
+    }
+  });
+
+  test('should not apply surcharge during exemption period', () => {
+    const multipleHouseOwner: OwnerInfo = {
+      householdType: '3plus_houses',
+    };
+
+    const exemptionPeriodTransaction: TransactionInfo = {
+      ...sampleTransaction,
+      transferDate: '2025-01-01',
+    };
+
+    const result = calculator.calculateCapitalGainsTax(
+      sampleProperty,
+      exemptionPeriodTransaction,
+      multipleHouseOwner
+    );
+
+    expect(result.success).toBe(true);
+    if (result.data) {
+      // 배제기간 중에는 중과 미적용 → 기본 누진세율
+      expect(result.data.longTermDeduction).toBeGreaterThan(0); // 장기보유특별공제 적용
     }
   });
 
@@ -97,18 +126,22 @@ describe('BaseCalculator', () => {
       location: { ...sampleProperty.location, isAdjustmentTargetArea: true },
     };
 
+    const postExemptionTransaction: TransactionInfo = {
+      ...sampleTransaction,
+      transferDate: '2026-06-01',
+    };
+
     const result = calculator.calculateCapitalGainsTax(
       adjustmentProperty,
-      sampleTransaction,
+      postExemptionTransaction,
       twoHouseOwner
     );
 
     expect(result.success).toBe(true);
     if (result.data) {
-      // 2주택 조정대상지역: 기본세율 + 20% 가산
       const threeHouseResult = calculator.calculateCapitalGainsTax(
         adjustmentProperty,
-        sampleTransaction,
+        postExemptionTransaction,
         { householdType: '3plus_houses' }
       );
       expect(threeHouseResult.success).toBe(true);
@@ -117,6 +150,8 @@ describe('BaseCalculator', () => {
       if (threeHouseResult.data) {
         expect(result.data.applicableTaxRate).toBeLessThan(threeHouseResult.data.applicableTaxRate);
       }
+      // 중과세 적용 시 장기보유특별공제 배제
+      expect(result.data.longTermDeduction).toBe(0);
     }
   });
 
