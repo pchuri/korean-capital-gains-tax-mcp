@@ -219,9 +219,7 @@ export class BaseCalculator {
     const applicableTaxRate = getFinalTaxRate(
       taxableIncome,
       holdingYears,
-      houseCount,
-      property.location.isAdjustmentTargetArea,
-      transaction.transferDate
+      multipleHouseSurcharge
     );
 
     let calculatedTax = 0;

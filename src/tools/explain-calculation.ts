@@ -5,7 +5,7 @@
 import { PropertyInfo, TransactionInfo, OwnerInfo } from '../types/index.js';
 import { calculateHoldingPeriodYears, calculateResidencePeriodYears } from '../utils/date-utils.js';
 import { getHouseCount } from '../utils/house-count.js';
-import { getLongTermDeductionRate, getFinalTaxRate } from '../utils/tax-rates.js';
+import { getLongTermDeductionRate, getFinalTaxRate, getMultipleHouseSurcharge } from '../utils/tax-rates.js';
 import { ONE_HOUSE_EXEMPTION_LIMIT } from '../utils/constants.js';
 
 export interface ExplainCalculationParams {
@@ -40,12 +40,16 @@ export async function explainCalculation(params: ExplainCalculationParams) {
   const longTermDeductionRate = getLongTermDeductionRate(holdingYears, hasResidenceRequirement);
 
   const houseCount = getHouseCount(owner.householdType);
+  const surcharge = getMultipleHouseSurcharge(
+    houseCount,
+    property.location.isAdjustmentTargetArea,
+    transaction.transferDate
+  );
 
   const applicableTaxRate = getFinalTaxRate(
     1000000, // 임시값
     holdingYears,
-    houseCount,
-    property.location.isAdjustmentTargetArea
+    surcharge
   );
 
   return {

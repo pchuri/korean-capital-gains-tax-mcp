@@ -90,13 +90,13 @@ export function getShortTermHeavyTaxRate(holdingYears: number): number | null {
 export function getMultipleHouseSurcharge(
   houseCount: number,
   isAdjustmentTargetArea: boolean,
-  transferDate?: string
+  transferDate: string
 ): number {
   if (!isAdjustmentTargetArea || houseCount <= 1) {
     return 0;
   }
 
-  if (transferDate && isWithinSurchargeExemptionPeriod(transferDate)) {
+  if (isWithinSurchargeExemptionPeriod(transferDate)) {
     return 0;
   }
 
@@ -116,13 +116,12 @@ function isWithinSurchargeExemptionPeriod(transferDate: string): boolean {
 
 /**
  * 최종 적용 세율 계산 (중과세 포함)
+ * @param multipleHouseSurcharge 사전 계산된 다주택자 중과세율 가산 (getMultipleHouseSurcharge 결과)
  */
 export function getFinalTaxRate(
   taxableIncome: number,
   holdingYears: number,
-  houseCount: number = 1,
-  isAdjustmentTargetArea: boolean = false,
-  transferDate?: string
+  multipleHouseSurcharge: number = 0
 ): number {
   // 단기보유 중과세 확인
   const shortTermRate = getShortTermHeavyTaxRate(holdingYears);
@@ -133,10 +132,7 @@ export function getFinalTaxRate(
   // 기본 세율
   const basicRate = getMarginalTaxRate(taxableIncome);
 
-  // 다주택자 중과세 가산
-  const surcharge = getMultipleHouseSurcharge(houseCount, isAdjustmentTargetArea, transferDate);
-
-  return Math.min(basicRate + surcharge, 70); // 최대 70%로 제한
+  return Math.min(basicRate + multipleHouseSurcharge, 70); // 최대 70%로 제한
 }
 
 /**
